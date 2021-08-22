@@ -1,0 +1,77 @@
+\NeedsTeXFormat{LaTeX2e}[1994/06/01]
+\ProvidesPackage{tikzviolinplots}[2021/08/20 Violin plot creation in pgfplots]
+
+\RequirePackage{pgfplots}
+\RequirePackage{pgfplotstable}
+
+
+\DeclareOption*{\PackageWarning{tikzviolinplots}{Unknown option: ‘\CurrentOption’}}
+\ProcessOptions\relax
+
+%
+% This command recieves as arguments a table name (#1), a column index (#2),
+% a bandwith (#3) and the number of samples for plotting (#4), and returns
+%
+
+\newcommand{\kde}[4]{%
+
+	% We start by making sure all commands are already existent.
+	% This forces us to use \renewcommand instead of \newcommand,
+	% but no errors occur due to using the command twice.
+
+	\providecommand{\thefilename}{}
+	\providecommand{\theindex}{}
+	\providecommand{\bandwith}{}
+	\providecommand{\nsamples}{}
+
+	\renewcommand{\thefilename}{#1}
+	\renewcommand{\theindex}{#2}
+	\renewcommand{\bandwith}{#3}
+	\renewcommand{\nsamples}{#4}
+
+	\pgfplotstableread{\thefilename}\theoldtable
+
+	\providecommand{\smallestelem}{}
+	\pgfplotstablegetelem{0}{[index] 0}\of{\theoldtable}
+	\pgfmathparse{\pgfplotsretval - 2*\bandwith}
+	\let\smallestelem\pgfmathresult
+
+	\pgfplotstablegetrowsof{\theoldtable}
+	\providecommand{\pgfcolsize}{}
+
+	\providecommand{\biggestelem}{}
+	\pgfmathparse{int(\pgfmathresult-1)}
+	\let\pgfcolsize\pgfmathresult
+	\pgfplotstablegetelem{\pgfmathresult}{[index] 0}\of{\theoldtable}
+	\pgfmathparse{\pgfplotsretval + 2*\bandwith}
+	\let\biggestelem\pgfmathresult
+
+	\pgfplotstableset{
+		create on use/list/.style={create col/expr={
+			\smallestelem + (\biggestelem-\smallestelem)
+			*(\pgfplotstablerow/(\nsamples-1))
+		}}
+	}
+
+	\pgfplotstablenew[columns={list}]{\nsamples}\thetable
+
+	\pgfplotstablecreatecol[
+		create col/assign/.code={
+%			\let\accumkde\pgfcolsize
+%			\let\multiplier{\pgfmathparse{%
+%				1.0/(\pgfcolsize*\bandwith*sqrt(2*3.14159265))
+%			}}
+%			\pgfplotsforeachcolumnelement{\theindex}\of\theoldtable\as\xi{%
+%				\let\exparg{((\xi-\thisrow{list})/\bandwith)}
+%				\let\accumkde{\accumkde + e^(-0.5*\exparg*\exparg)}
+%			}
+%			\let\accumkde{\accumkde*\multiplier}
+%			\accumkde
+			\edef\entry{int(\thisrow{list})}
+			\pgfkeyslet{/pgfplots/table/create col/next content}\entry
+		}
+	]{kdecol}\thetable
+
+	\pgfplotstabletypeset{\thetable}
+	%\addplot+[no marks] table [x index=0, y index=1] {\thetable};
+}
