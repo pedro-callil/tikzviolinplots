@@ -1,4 +1,4 @@
-\documentclass{standalone}
+\documentclass[tikz,border=1cm]{standalone}
 
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
@@ -6,14 +6,19 @@
 
 \begin{document}
 
-\kde{testfile_kde.dat}{B}{0.5}{25}
-
-%\begin{tikzpicture}
-%	\begin{axis}[
-%		axis lines = middle,
-%	]
-%		\kde{testfile_kde.dat}{B}{0.5}{25};
-%	\end{axis}
-%\end{tikzpicture}
+\begin{tikzpicture}
+	\begin{axis}[
+		ymajorgrids=true,
+		axis on top,
+		xticklabels={$T_1$,$T_2$,$T_3$},
+		xtick={1,2,3},
+		xmin=0, xmax=4,
+		ymin=-4, ymax=6,
+	]
+		\kde{testfile_violin.dat}{A}{50}{1}{green};
+		\kde{testfile_violin.dat}{B}{0.3}{50}{2}{yellow};
+		\kde{testfile_violin.dat}{C}{0.5}{50}{3}{red};
+	\end{axis}
+\end{tikzpicture}
 
 \end{document}
