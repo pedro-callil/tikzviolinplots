@@ -9,29 +9,21 @@
 \DeclareOption*{\PackageWarning{tikzviolinplots}{Unknown option: ‘\CurrentOption’}}
 \ProcessOptions\relax
 
-\providecommand{\theymin}{}
-\renewcommand{\theymin}{-100}
-\providecommand{\theymax}{}
-\renewcommand{\theymax}{100}
+\newcommand{\violinsetoptions}[3][]{%
 
-\newcommand{\violininit}[4]{%
-
-	\providecommand{\thexmin}{}
-	\providecommand{\thexmax}{}
-	\providecommand{\theymin}{}
-	\providecommand{\theymax}{}
-
-	\renewcommand{\thexmin}{#1}
-	\renewcommand{\thexmax}{#2}
-	\renewcommand{\theymin}{#3}
-	\renewcommand{\theymax}{#4}
+	\providecommand{\violinscaled}{}
+	\renewcommand{\violinscaled}{#1}
+	\providecommand{\violinaxisoptions}{}
+	\renewcommand{\violinaxisoptions}{#2}
+	\providecommand{\violinotheroptions}{}
+	\renewcommand{\violinotheroptions}{#3}
 
 	\begin{axis}[
-		ymajorgrids=true,
+		\violinaxisoptions,
+		\violinotheroptions,
 		axis on top,
 		xticklabels={,,},
-		xmin=\thexmin, xmax=\thexmax,
-		ymin=\theymin, ymax=\theymax,
+		xmajorticks=false,
 	]
 	\end{axis}
 }
@@ -65,16 +57,18 @@
 	\pgfmathparse{int(\pgfmathresult-1)}
 	\let\pgfcolsize\pgfmathresult
 
+	\pgfmathparse{0}
+	\let\kdestddev\pgfmathresult
+	\let\kdeaverage\pgfmathresult
+
+	\pgfplotstableforeachcolumnelement{\theindex}\of\theoldtable\as\xi{%
+		\pgfmathparse{\kdeaverage+(\xi/(1+\pgfcolsize))}
+		\let\kdeaverage\pgfmathresult
+	}
+
 	\ifthenelse{%
 		\equal{\bandwith}{}%
 	}{%
-		\pgfmathparse{0}
-		\let\kdestddev\pgfmathresult
-		\let\kdeaverage\pgfmathresult
-		\pgfplotstableforeachcolumnelement{\theindex}\of\theoldtable\as\xi{%
-			\pgfmathparse{\kdeaverage+(\xi/(1+\pgfcolsize))}
-			\let\kdeaverage\pgfmathresult
-		}
 		\pgfplotstableforeachcolumnelement{\theindex}\of\theoldtable\as\xi{%
 			\pgfmathparse{\kdestddev+(\xi-\kdeaverage)^2}
 			\let\kdestddev\pgfmathresult
@@ -86,14 +80,37 @@
 	}{%
 	}
 
-	\providecommand{\smallestelem}{}
 	\pgfplotstablegetelem{0}{\theindex}\of{\theoldtable}
-	\pgfmathparse{\pgfplotsretval - 3*\bandwith}
+	\providecommand{\smallestelem}{}
+	\renewcommand{\smallestelem}{\pgfplotsretval}
+	\providecommand{\biggestelem}{}
+	\renewcommand{\biggestelem}{\pgfplotsretval}
+	\pgfplotstableforeachcolumnelement{\theindex}\of\theoldtable\as\xi{%
+		\pgfmathparse{%
+			\xi > \smallestelem ? int(0) : int(1)%
+		}
+		\ifthenelse{
+			\pgfmathresult = 1
+		}{
+			\let\smallestelem\xi
+		}{
+		}
+	}
+	\pgfmathparse{\smallestelem - 3*\bandwith}
 	\let\smallestelem\pgfmathresult
 
-	\providecommand{\biggestelem}{}
-	\pgfplotstablegetelem{\pgfcolsize}{\theindex}\of{\theoldtable}
-	\pgfmathparse{\pgfplotsretval + 3*\bandwith}
+	\pgfplotstableforeachcolumnelement{\theindex}\of\theoldtable\as\xi{%
+		\pgfmathparse{%
+			\xi < \biggestelem ? int(0) : int(1)%
+		}
+		\ifthenelse{
+			\pgfmathresult = 1
+		}{
+			\let\biggestelem\xi
+		}{
+		}
+	}
+	\pgfmathparse{\biggestelem + 3*\bandwith}
 	\let\biggestelem\pgfmathresult
 
 	\pgfplotstableset{
@@ -105,6 +122,9 @@
 
 
 	\pgfplotstablenew[columns={list}]{\nsamples}\thetable
+
+	\pgfmathparse{0.0}
+	\let\biggesteleminkde\pgfmathresult
 
 	\pgfplotstablecreatecol[
 		create col/assign/.code={
@@ -122,11 +142,48 @@
 				\pgfmathparse{\accumkde + e^(-0.5*\exparg*\exparg)}
 				\let\accumkde\pgfmathresult
 			}
-			\pgfmathparse{\accumkde*\multiplier+\thedelta}
+			\pgfmathparse{\accumkde*\multiplier}
 			\let\entry\pgfmathresult
 			\pgfkeyslet{/pgfplots/table/create col/next content}\entry
 		}
 	]{kdecol}\thetable
+
+	\pgfplotstableforeachcolumnelement{kdecol}\of\thetable\as\entry{%
+		\pgfmathparse{%
+			\entry < \biggesteleminkde ? int(0) : int(1)%
+		}
+		\ifthenelse{
+			\pgfmathresult = 1
+		}{
+			\let\biggesteleminkde\entry
+		}{
+		}
+	}
+
+	\pgfplotstablemodifyeachcolumnelement{kdecol}\of\thetable\as\cell{%
+		\let\pgfplotstablezero\thedelta
+		\ifthenelse{
+			\pgfplotstablerow = 0
+		}{
+			\let\cell\pgfplotstablezero
+		}{
+			\pgfmathparse{int(\nsamples-1)}
+			\ifthenelse{
+				\pgfplotstablerow = \pgfmathresult
+			}{
+				\let\cell\pgfplotstablezero
+			}{
+				\ifthenelse{
+					\equal{\violinscaled}{}
+				}{
+					\pgfmathparse{\thedelta+\cell}
+				}{
+					\pgfmathparse{\thedelta+0.5*\cell/\biggesteleminkde}
+				}
+				\let\cell\pgfmathresult
+			}
+		}
+	}
 
 	\pgfplotstablecreatecol[
 		create col/assign/.code={
@@ -137,13 +194,11 @@
 	]{kdecolinv}\thetable
 
 	\begin{axis}[
-		ymajorgrids=true,
+		\violinaxisoptions,
 		axis on top,
 		yticklabels={,,},%
 		xticklabels={\thelabel},
 		xtick={\thedelta},
-		xmin=\thexmin, xmax=\thexmax,
-		ymin=\theymin, ymax=\theymax,
 	]
 		\addplot[
 			no marks,
@@ -174,7 +229,17 @@
 		\addplot[
 			no marks,
 			color=black,
-		] coordinates {(\thedelta,\theymin)(\thedelta,\theymax)};
+		] coordinates {
+			(\thedelta,\pgfkeysvalueof{/pgfplots/ymin})%
+			(\thedelta,\pgfkeysvalueof{/pgfplots/ymax})
+		};
+		\addplot[
+			only marks,
+			mark=o,
+			color=black,
+		] coordinates {
+			(\thedelta,\kdeaverage)
+		};
 	\end{axis}
 
 }
