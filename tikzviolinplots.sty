@@ -9,7 +9,34 @@
 \DeclareOption*{\PackageWarning{tikzviolinplots}{Unknown option: ‘\CurrentOption’}}
 \ProcessOptions\relax
 
-\newcommand{\kde}[6][1]{%
+\providecommand{\theymin}{}
+\renewcommand{\theymin}{-100}
+\providecommand{\theymax}{}
+\renewcommand{\theymax}{100}
+
+\newcommand{\violininit}[4]{%
+
+	\providecommand{\thexmin}{}
+	\providecommand{\thexmax}{}
+	\providecommand{\theymin}{}
+	\providecommand{\theymax}{}
+
+	\renewcommand{\thexmin}{#1}
+	\renewcommand{\thexmax}{#2}
+	\renewcommand{\theymin}{#3}
+	\renewcommand{\theymax}{#4}
+
+	\begin{axis}[
+		ymajorgrids=true,
+		axis on top,
+		xticklabels={,,},
+		xmin=\thexmin, xmax=\thexmax,
+		ymin=\theymin, ymax=\theymax,
+	]
+	\end{axis}
+}
+
+\newcommand{\kde}[7][]{%
 
 	% We start by making sure all commands are already existent.
 	% This forces us to use \renewcommand instead of \newcommand,
@@ -21,6 +48,7 @@
 	\providecommand{\nsamples}{}
 	\providecommand{\thedelta}{}
 	\providecommand{\thecolor}{}
+	\providecommand{\thelabel}{}
 
 	\renewcommand{\bandwith}{#1}
 	\renewcommand{\thefilename}{#2}
@@ -28,6 +56,7 @@
 	\renewcommand{\nsamples}{#4}
 	\renewcommand{\thedelta}{#5}
 	\renewcommand{\thecolor}{#6}
+	\renewcommand{\thelabel}{#7}
 
 	\pgfplotstableread{\thefilename}\theoldtable
 
@@ -37,8 +66,8 @@
 	\let\pgfcolsize\pgfmathresult
 
 	\ifthenelse{%
-		\equal{\bandwith}{-1}%
-	}{{%
+		\equal{\bandwith}{}%
+	}{%
 		\pgfmathparse{0}
 		\let\kdestddev\pgfmathresult
 		\let\kdeaverage\pgfmathresult
@@ -55,7 +84,7 @@
 		\pgfmathparse{1.06*\kdestddev*((1+\pgfcolsize)^0.2)}%
 		\let\bandwith\pgfmathresult
 	}{%
-	}}
+	}
 
 	\providecommand{\smallestelem}{}
 	\pgfplotstablegetelem{0}{\theindex}\of{\theoldtable}
@@ -74,7 +103,6 @@
 		}}
 	}
 
-	\message{\bandwith}
 
 	\pgfplotstablenew[columns={list}]{\nsamples}\thetable
 
@@ -108,31 +136,45 @@
 		}
 	]{kdecolinv}\thetable
 
-	\addplot[
-		no marks,
-		color=\thecolor,
-	] table [
-		x index=1, y index=0
-	] {\thetable};
-	\addplot[
-		no marks,
-		fill=\thecolor,
-		opacity=0.50,
-	] table [
-		x index=1, y index=0
-	] {\thetable};
-	\addplot[
-		no marks,
-		color=\thecolor,
-	] table [
-		x index=2, y index=0
-	] {\thetable};
-	\addplot[
-		no marks,
-		fill=\thecolor,
-		opacity=0.50,
-	] table [
-		x index=2, y index=0
-	] {\thetable};
+	\begin{axis}[
+		ymajorgrids=true,
+		axis on top,
+		yticklabels={,,},%
+		xticklabels={\thelabel},
+		xtick={\thedelta},
+		xmin=\thexmin, xmax=\thexmax,
+		ymin=\theymin, ymax=\theymax,
+	]
+		\addplot[
+			no marks,
+			color=\thecolor,
+		] table [
+			x index=1, y index=0
+		] {\thetable};
+		\addplot[
+			no marks,
+			fill=\thecolor,
+			opacity=0.50,
+		] table [
+			x index=1, y index=0
+		] {\thetable};
+		\addplot[
+			no marks,
+			color=\thecolor,
+		] table [
+			x index=2, y index=0
+		] {\thetable};
+		\addplot[
+			no marks,
+			fill=\thecolor,
+			opacity=0.50,
+		] table [
+			x index=2, y index=0
+		] {\thetable};
+		\addplot[
+			no marks,
+			color=black,
+		] coordinates {(\thedelta,\theymin)(\thedelta,\theymax)};
+	\end{axis}
 
 }
