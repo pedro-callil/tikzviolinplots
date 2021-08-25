@@ -4,6 +4,7 @@
 \RequirePackage{pgfplots}
 \RequirePackage{pgfplotstable}
 \RequirePackage{ifthen}
+\RequirePackage{stringstrings}
 
 
 \DeclareOption*{\PackageWarning{tikzviolinplots}{Unknown option: ‘\CurrentOption’}}
@@ -11,49 +12,82 @@
 
 \newcommand{\violinsetoptions}[3][]{%
 
-	\providecommand{\violinscaled}{}
-	\renewcommand{\violinscaled}{#1}
-	\providecommand{\violinaxisoptions}{}
-	\renewcommand{\violinaxisoptions}{#2}
-	\providecommand{\violinotheroptions}{}
-	\renewcommand{\violinotheroptions}{#3}
+	\def\violinscaled{FALSE}
+	\def\violindatapoints{FALSE}
+	\def\violinaverages{FALSE}
+	\def\violinnomirror{FALSE}
+	\def\violinreverseaxis{FALSE}
+	\def\violinaxisoptions{#2}
+	\def\violinotheroptions{#3}
 
-	\begin{axis}[
-		\violinaxisoptions,
-		\violinotheroptions,
-		axis on top,
-		xticklabels={,,},
-		xmajorticks=false,
-	]
-	\end{axis}
+	\@for\kdeoption:=#1\do{
+		\noblanks[q]{\kdeoption}
+		\ifthenelse{
+			\equal{\thestring}{scaled}
+		}{
+			\def\violinscaled{TRUE}
+		}{}
+		\ifthenelse{
+			\equal{\thestring}{datapoints}
+		}{
+			\def\violindatapoints{TRUE}
+		}{}
+		\ifthenelse{
+			\equal{\thestring}{averages}
+		}{
+			\def\violinaverages{TRUE}
+		}{}
+		\ifthenelse{
+			\equal{\thestring}{nomirror}
+		}{
+			\def\violinnomirror{TRUE}
+		}{}
+		\ifthenelse{
+			\equal{\thestring}{reverseaxis}
+		}{
+			\def\violinreverseaxis{TRUE}
+		}{}
+	}
+
+		\ifthenelse{
+			\equal{\violinreverseaxis}{TRUE}
+		}{
+			\begin{axis}[
+				\violinaxisoptions,
+				\violinotheroptions,
+				axis on top,
+				yticklabels={,,},
+				ymajorticks=false,
+			]
+			\end{axis}
+		}{
+			\begin{axis}[
+				\violinaxisoptions,
+				\violinotheroptions,
+				axis on top,
+				xticklabels={,,},
+				xmajorticks=false,
+			]
+			\end{axis}
+		}
+
+
 }
 
-\newcommand{\kde}[7][]{%
+\newcommand{\violinplot}[7][]{%
 
-	% We start by making sure all commands are already existent.
-	% This forces us to use \renewcommand instead of \newcommand,
-	% but no errors occur due to using the command twice.
 
-	\providecommand{\bandwith}{}
-	\providecommand{\thefilename}{}
-	\providecommand{\theindex}{}
-	\providecommand{\nsamples}{}
-	\providecommand{\thedelta}{}
-	\providecommand{\thecolor}{}
-	\providecommand{\thelabel}{}
-
-	\renewcommand{\bandwith}{#1}
-	\renewcommand{\thefilename}{#2}
-	\renewcommand{\theindex}{#3}
-	\renewcommand{\nsamples}{#4}
-	\renewcommand{\thedelta}{#5}
-	\renewcommand{\thecolor}{#6}
-	\renewcommand{\thelabel}{#7}
+	\def\bandwith{#1}
+	\def\thefilename{#2}
+	\def\theindex{#3}
+	\def\nsamples{#4}
+	\def\thedelta{#5}
+	\def\thecolor{#6}
+	\def\thelabel{#7}
 
 	\pgfplotstableread{\thefilename}\theoldtable
 
 	\pgfplotstablegetrowsof{\theoldtable}
-	\providecommand{\pgfcolsize}{}
 	\pgfmathparse{int(\pgfmathresult-1)}
 	\let\pgfcolsize\pgfmathresult
 
@@ -64,6 +98,27 @@
 	\pgfplotstableforeachcolumnelement{\theindex}\of\theoldtable\as\xi{%
 		\pgfmathparse{\kdeaverage+(\xi/(1+\pgfcolsize))}
 		\let\kdeaverage\pgfmathresult
+	}
+
+	\ifthenelse{
+		\equal{\violindatapoints}{TRUE}
+	}{
+		\pgfplotstablecreatecol[
+			create col/assign/.code={
+				\let\entry\thedelta
+				\pgfkeyslet{/pgfplots/table/create col/next content}\entry
+			}
+		]{deltacol}\theoldtable
+	}{}
+
+	\ifthenelse{
+		\equal{\violinreverseaxis}{TRUE}
+	}{
+		\def\kdeaxisx{y}
+		\def\kdeaxisy{x}
+	}{
+		\def\kdeaxisx{x}
+		\def\kdeaxisy{y}
 	}
 
 	\ifthenelse{%
@@ -81,10 +136,8 @@
 	}
 
 	\pgfplotstablegetelem{0}{\theindex}\of{\theoldtable}
-	\providecommand{\smallestelem}{}
-	\renewcommand{\smallestelem}{\pgfplotsretval}
-	\providecommand{\biggestelem}{}
-	\renewcommand{\biggestelem}{\pgfplotsretval}
+	\let\smallestelem\pgfplotsretval
+	\let\biggestelem\pgfplotsretval
 	\pgfplotstableforeachcolumnelement{\theindex}\of\theoldtable\as\xi{%
 		\pgfmathparse{%
 			\xi > \smallestelem ? int(0) : int(1)%
@@ -174,72 +227,149 @@
 				\let\cell\pgfplotstablezero
 			}{
 				\ifthenelse{
-					\equal{\violinscaled}{}
+					\equal{\violinnomirror}{TRUE}
 				}{
-					\pgfmathparse{\thedelta+\cell}
+					\pgfmathparse{1.9}
 				}{
-					\pgfmathparse{\thedelta+0.5*\cell/\biggesteleminkde}
+					\pgfmathparse{1}
+				}
+				\let\mirrormultiplier\pgfmathresult
+				\ifthenelse{
+					\equal{\violinscaled}{TRUE}
+				}{
+					\pgfmathparse{\thedelta+\mirrormultiplier*0.5*\cell/\biggesteleminkde}
+				}{
+					\pgfmathparse{\thedelta+\mirrormultiplier*\cell}
 				}
 				\let\cell\pgfmathresult
 			}
 		}
 	}
 
-	\pgfplotstablecreatecol[
-		create col/assign/.code={
-			\pgfmathparse{-\thisrow{kdecol}+2*\thedelta}
-			\let\entry\pgfmathresult
-			\pgfkeyslet{/pgfplots/table/create col/next content}\entry
+	\ifthenelse{
+		\equal{\violinnomirror}{FALSE}
+	}{
+		\pgfplotstablecreatecol[
+			create col/assign/.code={
+				\pgfmathparse{-\thisrow{kdecol}+2*\thedelta}
+				\let\entry\pgfmathresult
+				\pgfkeyslet{/pgfplots/table/create col/next content}\entry
+			}
+		]{kdecolinv}\thetable
+	}{}
+
+	\ifthenelse{
+		\equal{\violinreverseaxis}{TRUE}
+	}{
+		\pgfkeys{
+			/pgfplots/xticklabels={,,},
+			/pgfplots/yticklabels={\thelabel},
+			/pgfplots/ytick={\thedelta},
 		}
-	]{kdecolinv}\thetable
+	}{
+		\pgfkeys{
+			/pgfplots/yticklabels={,,},
+			/pgfplots/xticklabels={\thelabel},
+			/pgfplots/xtick={\thedelta},
+		}
+	}
 
 	\begin{axis}[
 		\violinaxisoptions,
 		axis on top,
-		yticklabels={,,},%
-		xticklabels={\thelabel},
-		xtick={\thedelta},
 	]
 		\addplot[
 			no marks,
 			color=\thecolor,
 		] table [
-			x index=1, y index=0
+			\kdeaxisx=kdecol, \kdeaxisy=list
 		] {\thetable};
 		\addplot[
 			no marks,
 			fill=\thecolor,
 			opacity=0.50,
 		] table [
-			x index=1, y index=0
+			\kdeaxisx=kdecol, \kdeaxisy=list
 		] {\thetable};
-		\addplot[
-			no marks,
-			color=\thecolor,
-		] table [
-			x index=2, y index=0
-		] {\thetable};
-		\addplot[
-			no marks,
-			fill=\thecolor,
-			opacity=0.50,
-		] table [
-			x index=2, y index=0
-		] {\thetable};
-		\addplot[
-			no marks,
-			color=black,
-		] coordinates {
-			(\thedelta,\pgfkeysvalueof{/pgfplots/ymin})%
-			(\thedelta,\pgfkeysvalueof{/pgfplots/ymax})
-		};
-		\addplot[
-			only marks,
-			mark=o,
-			color=black,
-		] coordinates {
-			(\thedelta,\kdeaverage)
-		};
+		\ifthenelse{
+			\equal{\violinnomirror}{FALSE}
+		}{
+			\addplot[
+				no marks,
+				color=\thecolor,
+			] table [
+				\kdeaxisx=kdecolinv, \kdeaxisy=list
+			] {\thetable};
+			\addplot[
+				no marks,
+				fill=\thecolor,
+				opacity=0.50,
+			] table [
+				\kdeaxisx=kdecolinv, \kdeaxisy=list
+			] {\thetable};
+		}{}
+		\ifthenelse{
+			\equal{\violinreverseaxis}{FALSE}
+		}{
+			\addplot[
+				no marks,
+				color=black,
+			] coordinates {
+				(\thedelta,\pgfkeysvalueof{/pgfplots/ymin})%
+				(\thedelta,\pgfkeysvalueof{/pgfplots/ymax})
+			};
+		}{
+			\addplot[
+				no marks,
+				color=black,
+			] coordinates {
+				(\pgfkeysvalueof{/pgfplots/xmin},\thedelta)%
+				(\pgfkeysvalueof{/pgfplots/xmax},\thedelta)
+			};
+		}
+		\ifthenelse{
+			\equal{\violinaverages}{TRUE}
+		}{
+			\ifthenelse{
+				\equal{\violinreverseaxis}{TRUE}
+			}{
+				\addplot[
+					only marks,
+					mark=x,
+					mark size=3,
+					color=black,
+					fill=\thecolor,
+					fill opacity=0.70,
+				] coordinates {
+					(\kdeaverage,\thedelta)
+				};
+			}{
+				\addplot[
+					only marks,
+					mark=x,
+					mark size=3,
+					color=black,
+					fill=\thecolor,
+					fill opacity=0.70,
+				] coordinates {
+					(\thedelta,\kdeaverage)
+				};
+			}
+		}{}
+		\ifthenelse{
+			\equal{\violindatapoints}{TRUE}
+		}{
+			\addplot[
+				only marks,
+				mark=*,
+				mark size=1,
+				fill=\thecolor,
+				opacity=0.30,
+			] table [
+				\kdeaxisx=deltacol,
+				\kdeaxisy=\theindex,
+			] {\theoldtable};
+		}{}
 	\end{axis}
 
 }
