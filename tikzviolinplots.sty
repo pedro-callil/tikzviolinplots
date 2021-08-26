@@ -5,6 +5,7 @@
 \RequirePackage{pgfplotstable}
 \RequirePackage{ifthen}
 \RequirePackage{stringstrings}
+\RequirePackage{pgfkeys}
 
 
 \DeclareOption*{\PackageWarning{tikzviolinplots}{Unknown option: ‘\CurrentOption’}}
@@ -74,16 +75,30 @@
 
 }
 
-\newcommand{\violinplot}[7][]{%
+\pgfkeys{
+	/violinplot/.is family, /violinplot,
+	default/.style = {
+		bandwidth=NONE,
+		index=DATA,
+		samples=50,
+		relative position=0
+		color=black,
+		label={LABEL},
+	},
+	bandwidth/.estore in = \bandwidth,
+	index/.estore in = \theindex,
+	samples/.estore in = \nsamples,
+	relative position/.estore in = \thedelta,
+	color/.estore in = \thecolor,
+	label/.estore in = \thelabel,
+}
+
+\newcommand{\violinplot}[2][1]{%
+
+	\pgfkeys{/violinplot, default, #1}
 
 
-	\def\bandwith{#1}
 	\def\thefilename{#2}
-	\def\theindex{#3}
-	\def\nsamples{#4}
-	\def\thedelta{#5}
-	\def\thecolor{#6}
-	\def\thelabel{#7}
 
 	\pgfplotstableread{\thefilename}\theoldtable
 
@@ -122,7 +137,7 @@
 	}
 
 	\ifthenelse{%
-		\equal{\bandwith}{}%
+		\equal{\bandwidth}{NONE}%
 	}{%
 		\pgfplotstableforeachcolumnelement{\theindex}\of\theoldtable\as\xi{%
 			\pgfmathparse{\kdestddev+(\xi-\kdeaverage)^2}
@@ -131,7 +146,7 @@
 		\pgfmathparse{sqrt(\kdestddev/(1+\pgfcolsize))}
 		\let\kdestddev\pgfmathresult
 		\pgfmathparse{1.06*\kdestddev*((1+\pgfcolsize)^0.2)}%
-		\let\bandwith\pgfmathresult
+		\let\bandwidth\pgfmathresult
 	}{%
 	}
 
@@ -149,7 +164,7 @@
 		}{
 		}
 	}
-	\pgfmathparse{\smallestelem - 3*\bandwith}
+	\pgfmathparse{\smallestelem - 3*\bandwidth}
 	\let\smallestelem\pgfmathresult
 
 	\pgfplotstableforeachcolumnelement{\theindex}\of\theoldtable\as\xi{%
@@ -163,7 +178,7 @@
 		}{
 		}
 	}
-	\pgfmathparse{\biggestelem + 3*\bandwith}
+	\pgfmathparse{\biggestelem + 3*\bandwidth}
 	\let\biggestelem\pgfmathresult
 
 	\pgfplotstableset{
@@ -184,13 +199,13 @@
 			\pgfmathparse{\pgfcolsize+1}
 			\let\pgfcolsize\pgfmathresult
 			\pgfmathparse{%
-				1.0/(\pgfcolsize*\bandwith*sqrt(2*3.14159265))
+				1.0/(\pgfcolsize*\bandwidth*sqrt(2*3.14159265))
 			}
 			\let\multiplier\pgfmathresult
 			\pgfmathparse{0}
 			\let\accumkde\pgfmathresult
 			\pgfplotstableforeachcolumnelement{\theindex}\of\theoldtable\as\xi{%
-				\pgfmathparse{((\xi-\thisrow{list})/\bandwith)}
+				\pgfmathparse{((\xi-\thisrow{list})/\bandwidth)}
 				\let\exparg\pgfmathresult
 				\pgfmathparse{\accumkde + e^(-0.5*\exparg*\exparg)}
 				\let\accumkde\pgfmathresult
