@@ -1,10 +1,10 @@
 \documentclass{article}
 
 \usepackage{pgfplots}
-\pgfplotsset{width=0.7\linewidth,compat=1.18}
+\pgfplotsset{width=0.9\linewidth,compat=1.18}
 \usepackage{tikzviolinplots}
-\usepgfplotslibrary{external}
-\tikzexternalize
+%\usepgfplotslibrary{external}
+%\tikzexternalize
 \usepackage{minted}
 \usemintedstyle{tango}
 \usepackage{amsmath}
@@ -51,7 +51,8 @@ This package, through the use of the package \texttt{pgfplots}, allows the
 creation of violin plots in \LaTeX. Violin plots are similar to boxplots,
 but instead of a box signalling the average and quartiles, a kernel density
 estimator is plotted, as in formula \ref{eq:kde}, in which the kernel is a
-non negative function (chosen here as the normal distribution).
+probability distribution (available are the gaussian, uniform, logistic,
+triangular and parabolic distributions).
 
 \begin{equation}
 	\label{eq:kde}
@@ -131,28 +132,61 @@ This command takes one mandatory argument, and a list of options:
 
 \begin{minted}[escapeinside=||]{latex}
 	\violinplot[%
-		bandwidth=|\textit{bandwidth}|,
-		index=|\textit{column name}|,
-		samples=|\textit{\textnumero of samples}|,
-		relative position=|\textit{relative position}|,
-		color=|\textit{color}|,
-		label=|\textit{label}|,
+		|\textit{<option>}=\textit{<value>}|
 	]{|\textit{filename}|}
 \end{minted}
 
 The filename (mandatory argument) must be a path to a file storing the data as
-space-separated columns, identified, in the file, with the column name passed as
-the option \texttt{index}.
+space-separated columns. The optional argument is a list of options, including:
 
-The options available are the \texttt{bandwith} of the kernel density estimator
-($h$ in equation \ref{eq:kde}), the name of the column with the data,
-the number of points (\texttt{samples}) in which the density shall be
-calculated, the position of the plot in the axis orthogonal to the argument
-of the function (the $x$-axis if the option \texttt{reverse axis} is not
-passed to \texttt{{\textbackslash}violinsetoptions} and the $y$-axis otherwise),
-the \texttt{color} of the plot and its \texttt{label}.
+\begin{itemize}
+	\item \texttt{index}: Necessary option, is the name of the column with
+		the data to be plotted.
+	\item \texttt{kernel}: The function to be used for the kernel density
+		estimation; available values are \texttt{gaussian} (default),
+		\texttt{logistic}, \texttt{parabolic}, \texttt{uniform}
+		and \texttt{triangular}.
+	\item \texttt{bandwidth}: Smoothing parameter for the kernel density
+		estimation; defaults to $h$ in equation \ref{eq:band},
+		which assumes gaussian distribution.
+		\begin{equation}
+			\label{eq:band}
+			h=\sqrt[5]{\frac{4\times\textnormal{stddev}%
+			\left(x_1,x_2,\ldots,x_n\right)^5}{3n}}
+		\end{equation}
+	\item \texttt{samples}: Number of points in which the kernel density
+		estimation will be calculated and plotted. Defaults
+		to 50.
+	\item \texttt{relative position}: position of the plot in the axis
+		with the labels for each dataset. Defaults to 0.
+	\item \texttt{color}: Color of the plot, border and interior.
+		Defaults to black. The interior is colored with 0.5
+		opacity.
+	\item \texttt{label}: Label of the plot, positioned at the point
+		set by \texttt{relative position}.
+	\item Options for average and data points:
+	\begin{itemize}
+		\item \texttt{average marks}, \texttt{points marks}: Mark used
+			for averages and points of the data set (defaults
+			to ``\texttt{x}'' and ``\texttt{*}'', respectively).
+		\item \texttt{average size}, \texttt{points size}: Size
+			of each mark (defaults to 3pt for averages and 1pt
+			for other points).
+		\item \texttt{average color}, \texttt{points color}: Color
+			of each mark's border. Defaults to black in both
+			cases.
+		\item \texttt{average opacity}, \texttt{points opacity}:
+			Border opacity. Defaults to 1.0 in both cases.
+		\item \texttt{average fill}, \texttt{points fill}: Color
+			of each mark's interior. Defaults to black for the
+			points of the data set and white for the averages.
+		\item \texttt{average fill opacity}, \texttt{points fill opacity}:
+			Opacity of the marks. Defaults to 0.5 for averages and
+			0.2 for the other points.
+	\end{itemize}
+\end{itemize}
 
-\section{Example}
+\subsection{Examples}
 
 To show the usage of the package, we plotted several data sets two times, in
 figures \ref{graph:violin_verti} and \ref{graph:violin_horiz}.
@@ -188,7 +222,6 @@ figures \ref{graph:violin_verti} and \ref{graph:violin_horiz}.
 			label={$\beta$},
 		]{example.dat};
 		\violinplot[%
-			bandwidth=0.5,
 			index=A,
 			relative position=3,
 			color=orange!50!black,
@@ -201,7 +234,6 @@ figures \ref{graph:violin_verti} and \ref{graph:violin_horiz}.
 			label={$\delta$}
 		]{example.dat};
 		\violinplot[%
-			bandwidth=0.3,
 			index=E,
 			relative position=5,
 			color=orange!100!black,
@@ -247,7 +279,6 @@ Code for figure \ref{graph:violin_verti}:
 			label={$\beta$},
 		]{example.dat};
 		\violinplot[%
-			bandwidth=0.5,
 			index=A,
 			relative position=3,
 			color=orange!50!black,
@@ -260,7 +291,6 @@ Code for figure \ref{graph:violin_verti}:
 			label={$\delta$}
 		]{example.dat};
 		\violinplot[%
-			bandwidth=0.3,
 			index=E,
 			relative position=5,
 			color=orange!100!black,
@@ -302,7 +332,6 @@ Code for figure \ref{graph:violin_verti}:
 			label={$\beta$},
 		]{example.dat};
 		\violinplot[%
-			bandwidth=0.5,
 			index=A,
 			relative position=3,
 			color=blue!50!black,
@@ -315,7 +344,6 @@ Code for figure \ref{graph:violin_verti}:
 			label={$\delta$}
 		]{example.dat};
 		\violinplot[%
-			bandwidth=0.3,
 			index=E,
 			relative position=5,
 			color=blue!100!black,
@@ -361,7 +389,6 @@ Code for figure \ref{graph:violin_horiz}:
 			label={$\beta$},
 		]{example.dat};
 		\violinplot[%
-			bandwidth=0.5,
 			index=A,
 			relative position=3,
 			color=blue!50!black,
@@ -374,7 +401,6 @@ Code for figure \ref{graph:violin_horiz}:
 			label={$\delta$}
 		]{example.dat};
 		\violinplot[%
-			bandwidth=0.3,
 			index=E,
 			relative position=5,
 			color=blue!100!black,
