@@ -72,14 +72,13 @@ be done with the command \texttt{{\textbackslash}violinplot}.
 
 \subsection{General options: \texttt{{\textbackslash}violinsetoptions}}
 
-The command \texttt{{\textbackslash}violinsetoptions} takes three arguments,
-an optional argument with package-specific options and two mandatory
-arguments with options to be passed to \texttt{pgfplots}.
+The command \texttt{{\textbackslash}violinsetoptions} takes two arguments,
+an optional argument with package-specific options and a mandatory
+argument with options to be passed to \texttt{pgfplots}.
 
 \begin{minted}[escapeinside=||]{latex}
 	\violinsetoptions[|\textit{<package-specific options>}|]%
-	{|\textit{<plot limits>}|}%
-	{|\textit{<pgfplots general options>}|}
+		{|\textit{<pgfplots general options>}|}
 \end{minted}
 
 \subsubsection{Package-specific options}
@@ -112,19 +111,19 @@ one might use the option \texttt{reverse axis}.
 
 \subsubsection{Plot limits and other \texttt{pgfplots} options}
 
-The minima and maxima of the plot axes are set in the second (and first
+The minima and maxima of the plot axes must be set in the second (and first
 mandatory) argument to the command, and should follow \texttt{pgfplots}
 syntax. For instance, to set the minimum and maximum of the $x$-axis
 to -3 and 6, and of the $y$-axis to 2.5 and 7, one might use:
 
 \begin{minted}[escapeinside=||]{latex}
 	\violinsetoptions[|\textit{<package-specific options>}|]%
-	{xmin=-3, xmax=6, ymin=2.5, xmin=7,}%
-	{|\textit{<pgfplots general options>}|}
+		{xmin=-3, xmax=6, ymin=2.5, xmin=7,%
+		|\textit{<pgfplots general options>}|}
 \end{minted}
 
 Other \texttt{pgfplots} expressions such as title or axes labels may be set
-in the same way in the next argument.
+in the same way in this argument.
 
 \subsection{Options for each data set: \texttt{{\textbackslash}violinplot}}
 
@@ -200,7 +199,6 @@ figures \ref{graph:violin_verti} and \ref{graph:violin_horiz}.
 		]{
 			xmin=0,xmax=6,
 			ymin=-4,ymax=6,
-		}{
 			title={Plotting Some Data},
 			xlabel={Groups},
 			ylabel={Some property},
@@ -257,7 +255,6 @@ Code for figure \ref{graph:violin_verti}:
 		]{
 			xmin=0,xmax=6,
 			ymin=-4,ymax=6,
-		}{
 			title={Plotting Some Data},
 			xlabel={Groups},
 			ylabel={Some property},
@@ -310,7 +307,6 @@ Code for figure \ref{graph:violin_verti}:
 		]{%
 			xmin=-4,xmax=6,
 			ymin=0.7,ymax=7,
-		}{%
 			title={Plotting Some Data},
 			ylabel={Groups},
 			xlabel={Some property},
@@ -367,7 +363,6 @@ Code for figure \ref{graph:violin_horiz}:
 		]{%
 			xmin=-4,xmax=6,
 			ymin=0.7,ymax=7,
-		}{%
 			title={Plotting Some Data},
 			ylabel={Groups},
 			xlabel={Some property},

@@ -1,5 +1,5 @@
 \NeedsTeXFormat{LaTeX2e}[1994/06/01]
-\ProvidesPackage{tikzviolinplots}[2021/08/20 v0.6 Violin plot creation in pgfplots]
+\ProvidesPackage{tikzviolinplots}[2021/08/27 v0.6 Violin plot creation in pgfplots]
 
 \RequirePackage{pgfplots}
 \RequirePackage{pgfplotstable}
@@ -11,7 +11,7 @@
 \DeclareOption*{\PackageWarning{tikzviolinplots}{Unknown option: ‘\CurrentOption’}}
 \ProcessOptions\relax
 
-\newcommand{\violinsetoptions}[3][]{%
+\newcommand{\violinsetoptions}[2][]{%
 
 	\def\violin@scaled{FALSE}
 	\def\violin@datapoints{FALSE}
@@ -19,7 +19,6 @@
 	\def\violin@nomirror{FALSE}
 	\def\violin@reverseaxis{FALSE}
 	\def\violin@axisoptions{#2}
-	\def\violin@otheroptions{#3}
 
 	\@for\kdeoption:=#1\do{
 		\noblanks[q]{\kdeoption}
@@ -50,28 +49,61 @@
 		}{}
 	}
 
-		\ifthenelse{
-			\equal{\violin@reverseaxis}{TRUE}
-		}{
-			\begin{axis}[
-				\violin@axisoptions,
-				\violin@otheroptions,
-				axis on top,
-				yticklabels={,,},
-				ymajorticks=false,
-			]
-			\end{axis}
-		}{
-			\begin{axis}[
-				\violin@axisoptions,
-				\violin@otheroptions,
-				axis on top,
-				xticklabels={,,},
-				xmajorticks=false,
-			]
-			\end{axis}
-		}
+	\ifthenelse{
+		\equal{\violin@reverseaxis}{TRUE}
+	}{
+		\begin{axis}[
+			\violin@axisoptions,
+			axis on top,
+			yticklabels={,,},
+			ymajorticks=false,
+		]
+		\end{axis}
+	}{
+		\begin{axis}[
+			\violin@axisoptions,
+			axis on top,
+			xticklabels={,,},
+			xmajorticks=false,
+		]
+		\end{axis}
+	}
 
+	\@for\kdeoption:=\violin@axisoptions\do{
+		\noblanks[e]{\kdeoption}
+		\let\violin@opt\thestring
+		\whereisword[q]{\violin@opt}{xmin}
+		\ifthenelse{
+			\equal{\theresult}{0}
+		}{}{
+			\let\violin@axis@xmin\violin@opt
+		}
+		\whereisword[q]{\violin@opt}{xmax}
+		\ifthenelse{
+			\equal{\theresult}{0}
+		}{}{
+			\let\violin@axis@xmax\violin@opt
+		}
+		\whereisword[q]{\violin@opt}{ymin}
+		\ifthenelse{
+			\equal{\theresult}{0}
+		}{}{
+			\let\violin@axis@ymin\violin@opt
+		}
+		\whereisword[q]{\violin@opt}{ymax}
+		\ifthenelse{
+			\equal{\theresult}{0}
+		}{}{
+			\let\violin@axis@ymax\violin@opt
+		}
+	}
+
+	\def\violin@axislimits{
+		\violin@axis@xmin,\violin@axis@xmax,
+		\violin@axis@ymin,\violin@axis@ymax,
+	}
+
+	\let\violin@axisoptions\violin@axislimits
 
 }
 
