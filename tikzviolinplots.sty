@@ -116,6 +116,7 @@
 		samples=50,
 		relative position=0
 		color=black,
+		secondary color=white,
 		label={LABEL},
 		average mark=x,
 		average size=3pt,
@@ -129,6 +130,9 @@
 		points opacity=1.0,
 		points fill=black,
 		points fill opacity=0.2,
+		batch spacing=1.0,
+		batch indexes={A,B,C},
+		batch labels={A,B,C},
 	},
 	kernel/.estore in = \violin@kernel,
 	bandwidth/.estore in = \violin@bandwidth,
@@ -136,6 +140,7 @@
 	samples/.estore in = \violin@samples,
 	relative position/.estore in = \violin@delta,
 	color/.estore in = \violin@color,
+	secondary color/.estore in = \violin@secondarycolor,
 	label/.estore in = \violin@label,
 	average mark/.estore in = \violin@avg@mark,
 	average size/.estore in = \violin@avg@size,
@@ -149,9 +154,12 @@
 	points opacity/.estore in = \violin@pts@opacity,
 	points fill/.estore in = \violin@pts@fillcolor,
 	points fill opacity/.estore in = \violin@pts@fillopacity,
+	batch spacing/.estore in = \violin@batch@delta,
+	batch indexes/.estore in = \violin@batch@indexes,
+	batch labels/.estore in = \violin@batch@labels,
 }
 
-\newcommand{\violinplot}[2][1]{%
+\newcommand{\violinplot}[2][]{%
 
 	\pgfkeys{/violinplot, default, #1}
 
@@ -512,3 +520,72 @@
 	\end{axis}
 
 }
+
+\newcommand{\violin@getnth}[2]{%
+	\pgfmathparse{int(0)}
+	\let\violin@getnth@counter\pgfmathresult
+	\let\violin@nthelem\pgfmathresult
+	\@for\violin@listelem:=#1\do{
+		\ifthenelse{
+			\equal{#2}{\violin@getnth@counter}
+		}{
+			\let\violin@nthelem\violin@listelem
+			\pgfmathparse{int(\violin@getnth@counter+1)}
+			\let\violin@getnth@counter\pgfmathresult
+		}{
+			\pgfmathparse{int(\violin@getnth@counter+1)}
+			\let\violin@getnth@counter\pgfmathresult
+		}
+	}
+}
+
+\newcommand{\violinplotwholefile}[2][]{%
+
+	\pgfkeys{/violinplot, default, #1}
+	\def\violin@batch@filename{#2}
+
+	\pgfmathparse{0}
+	\let\violin@batch@numofplots\pgfmathresult
+	\@for\index:=\violin@batch@indexes\do{
+		\pgfmathparse{int(\violin@batch@numofplots+1)}
+		\let\violin@batch@numofplots\pgfmathresult
+	}
+
+	\pgfmathparse{0}
+	\let\violin@batch@colordeg\pgfmathresult
+	\let\violin@batch@counter\pgfmathresult
+	\let\violin@batch@relativepos\pgfmathresult
+
+	\let\violin@colororig\violin@color
+	\let\violin@secondarycolororig\violin@secondarycolor
+
+	\@for\violin@batch@index:=\violin@batch@indexes\do{
+		\pgfmathparse{int(\violin@batch@counter*%
+			(100/(\violin@batch@numofplots-1)))}
+		\let\violin@batch@colordeg\pgfmathresult
+		\def\violin@batch@color{\violin@colororig!\violin@batch@colordeg!\violin@secondarycolororig}
+
+		\violin@getnth{\violin@batch@labels}{\violin@batch@counter}
+		\let\violin@batch@label\violin@nthelem
+
+		\pgfmathparse{1+\violin@batch@counter*\violin@batch@delta}
+		\let\violin@batch@relativepos\pgfmathresult
+
+
+		\let\violin@batch@labels@temp\violin@batch@labels
+
+		\violinplot[%
+			index=\violin@batch@index,
+			relative position=\violin@batch@relativepos,
+			color=\violin@batch@color,
+			label={\violin@batch@label},
+		]{\violin@batch@filename};
+
+		\let\violin@batch@labels\violin@batch@labels@temp
+
+		\pgfmathparse{int(\violin@batch@counter+1)}
+		\let\violin@batch@counter\pgfmathresult
+	}
+
+}
+

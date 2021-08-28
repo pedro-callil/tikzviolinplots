@@ -3,8 +3,8 @@
 \usepackage{pgfplots}
 \pgfplotsset{width=0.9\linewidth,compat=1.18}
 \usepackage{tikzviolinplots}
-%\usepgfplotslibrary{external}
-%\tikzexternalize
+\usepgfplotslibrary{external}
+\tikzexternalize
 \usepackage{minted}
 \usemintedstyle{tango}
 \usepackage{amsmath}
@@ -68,7 +68,8 @@ plots and insert each individual dataset.
 
 To set the general options, the command \texttt{{\textbackslash}violinsetoptions}
 is provided, and must be invoked before plotting the datasets. This should
-be done with the command \texttt{{\textbackslash}violinplot}.
+be done with the commands \texttt{{\textbackslash}violinplot} or
+\texttt{{\textbackslash}violinplotwholefile}.
 
 \subsection{General options: \texttt{{\textbackslash}violinsetoptions}}
 
@@ -127,6 +128,9 @@ in the same way in this argument.
 
 \subsection{Options for each data set: \texttt{{\textbackslash}violinplot}}
 
+If the data sets are not very similar and/or advanced customizations
+are desired, \texttt{{\textbackslash}violinplot} should be used to
+plot each data set individually.
 This command takes one mandatory argument, and a list of options:
 
 \begin{minted}[escapeinside=||]{latex}
@@ -185,10 +189,36 @@ space-separated columns. The optional argument is a list of options, including:
 	\end{itemize}
 \end{itemize}
 
+\subsection{Simplified interface: \texttt{{\textbackslash}violinplotwholefile}}
+
+If the data sets are similar and no customizations are required, one might
+use the command \texttt{{\textbackslash}violinplotwholefile}.
+
+\begin{minted}[escapeinside=||]{latex}
+	\violinplotwholefile[%
+		|\textit{<option>}=\textit{<value>}|
+	]{|\textit{filename}|}
+\end{minted}
+
+This command will calculate and plot all columns named. The available options
+are:
+
+\begin{itemize}
+	\item \texttt{color}: Primary color utilised. A gradient is built from
+		the secondary color to it. Defaults to black.
+	\item \texttt{secondary color}: Secondary color utilized. A
+		gradient is built from it to the primary color. Defaults
+		to white.
+	\item \texttt{batch indexes}: List of columns to be plotted.
+	\item \texttt{batch spacing}: Distance between plots. Defaults to 1.0.
+	\item \texttt{batch labels}: Labels of the data to be plotted.
+\end{itemize}
+
 \subsection{Examples}
 
 To show the usage of the package, we plotted several data sets two times, in
-figures \ref{graph:violin_verti} and \ref{graph:violin_horiz}.
+figures \ref{graph:violin_verti} and \ref{graph:violin_horiz}, using either the
+simplified or the complete interface.
 
 \begin{figure}[h]
 	\centering
@@ -207,47 +237,35 @@ figures \ref{graph:violin_verti} and \ref{graph:violin_horiz}.
 			},
 			ymajorgrids=true,
 		};
-		\violinplot[%
-			index=C,
-			relative position=1,
-			color=orange!0!black,
-			label={$\alpha$},
-		]{example.dat};
-		\violinplot[%
-			index=B,
-			relative position=2,
-			color=orange!25!black,
-			label={$\beta$},
-		]{example.dat};
-		\violinplot[%
-			index=A,
-			relative position=3,
-			color=orange!50!black,
-			label={$\gamma$},
-		]{example.dat};
-		\violinplot[%
-			index=D,
-			relative position=4,
-			color=orange!75!black,
-			label={$\delta$}
-		]{example.dat};
-		\violinplot[%
-			index=E,
-			relative position=5,
-			color=orange!100!black,
-			label={$\epsilon$}
-		]{example.dat};
+		\violinplotwholefile[%
+			color=orange,
+			secondary color=black,
+			batch indexes={C,B,A,D,E},
+			batch spacing=1.0,
+			batch labels={%
+				$\alpha$,
+				$\beta$,
+				$\gamma$,
+				$\delta$,
+				$\epsilon$
+			},
+		]{example.dat}
 	\end{tikzpicture}
 	\caption{Violin plot -- vertical example}
 	\label{graph:violin_verti}
 \end{figure}
 
-Code for figure \ref{graph:violin_verti}:
+Code for figure \ref{graph:violin_verti}, using
+\texttt{{\textbackslash}violinplotwholefile}:
 
 \colorlet{mintedbgverti}{orange!10!white}
 
-\begin{minted}[bgcolor=mintedbgverti]{latex}
-
+\begin{minted}[%
+	escapeinside=||,
+	frame=single,
+	rulecolor=mintedbgverti,
+	framesep=10pt,
+	bgcolor=mintedbgverti]{latex}
 	\begin{tikzpicture}
 		\violinsetoptions[
 			data points,
@@ -263,36 +281,19 @@ Code for figure \ref{graph:violin_verti}:
 			},
 			ymajorgrids=true,
 		};
-		\violinplot[%
-			index=C,
-			relative position=1,
-			color=orange!0!black,
-			label={$\alpha$},
-		]{example.dat};
-		\violinplot[%
-			index=B,
-			relative position=2,
-			color=orange!25!black,
-			label={$\beta$},
-		]{example.dat};
-		\violinplot[%
-			index=A,
-			relative position=3,
-			color=orange!50!black,
-			label={$\gamma$},
-		]{example.dat};
-		\violinplot[%
-			index=D,
-			relative position=4,
-			color=orange!75!black,
-			label={$\delta$}
-		]{example.dat};
-		\violinplot[%
-			index=E,
-			relative position=5,
-			color=orange!100!black,
-			label={$\epsilon$}
-		]{example.dat};
+		\violinplotwholefile[%
+			color=orange,
+			secondary color=black,
+			batch indexes={C,B,A,D,E},
+			batch spacing=1.0,
+			batch labels={%
+				$\alpha$,
+				$\beta$,
+				$\gamma$,
+				$\delta$,
+				$\epsilon$
+			},
+		]{example.dat}
 	\end{tikzpicture}
 
 \end{minted}
@@ -320,6 +321,7 @@ Code for figure \ref{graph:violin_verti}:
 			relative position=1,
 			color=blue!0!black,
 			label={$\alpha$},
+			kernel=logistic,
 		]{example.dat};
 		\violinplot[%
 			index=B,
@@ -332,6 +334,12 @@ Code for figure \ref{graph:violin_verti}:
 			relative position=3,
 			color=blue!50!black,
 			label={$\gamma$},
+			kernel=parabolic,
+			bandwidth=0.4,
+			average mark=*,
+			average size=2pt,
+			average fill=blue!70!black,
+			average fill opacity=1.0,
 		]{example.dat};
 		\violinplot[%
 			index=D,
@@ -343,18 +351,24 @@ Code for figure \ref{graph:violin_verti}:
 			index=E,
 			relative position=5,
 			color=blue!100!black,
-			label={$\epsilon$}
+			label={$\epsilon$},
 		]{example.dat};
 	\end{tikzpicture}
 	\caption{Violin plot -- horizontal example}
 	\label{graph:violin_horiz}
 \end{figure}
 
-Code for figure \ref{graph:violin_horiz}:
+Code for figure \ref{graph:violin_horiz}, using
+\texttt{{\textbackslash}violinplot}:
 
 \colorlet{mintedbghoriz}{blue!10!white}
 
-\begin{minted}[bgcolor=mintedbghoriz]{latex}
+\begin{minted}[%
+	escapeinside=||,
+	frame=single,
+	rulecolor=mintedbghoriz,
+	framesep=10pt,
+	bgcolor=mintedbghoriz]{latex}
 	\begin{tikzpicture}
 		\violinsetoptions[
 			no mirror,
@@ -376,6 +390,7 @@ Code for figure \ref{graph:violin_horiz}:
 			relative position=1,
 			color=blue!0!black,
 			label={$\alpha$},
+			kernel=logistic,
 		]{example.dat};
 		\violinplot[%
 			index=B,
@@ -388,6 +403,12 @@ Code for figure \ref{graph:violin_horiz}:
 			relative position=3,
 			color=blue!50!black,
 			label={$\gamma$},
+			kernel=parabolic,
+			bandwidth=0.4,
+			average mark=*,
+			average size=2pt,
+			average fill=blue!70!black,
+			average fill opacity=1.0,
 		]{example.dat};
 		\violinplot[%
 			index=D,
