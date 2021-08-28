@@ -8,9 +8,11 @@
 \usepackage{minted}
 \usemintedstyle{tango}
 \usepackage{amsmath}
+\usepackage{scontents}
+\usepackage{microtype}
 \usepackage{hyperref}
 
-\begin{filecontents*}{example.dat}
+\begin{scontents}[write-out=example.dat]
 A	B	C	D	E
 0.3	-2.1	3.50	2.89	1.00
 0.41	-1.9	3.55	2.88	1.06
@@ -30,7 +32,7 @@ A	B	C	D	E
 2.48	0.1	3.80	3.24	2.49
 2.51	0.3	3.85	3.16	1.00
 2.57	0.5	3.85	3.30	3.04
-\end{filecontents*}
+\end{scontents}
 
 \title{The \texttt{tikzviolinplots} package}
 \author{Pedro Callil}
@@ -143,6 +145,11 @@ The filename (mandatory argument) must be a path to a file storing the data as
 space-separated columns. The optional argument is a list of options, including:
 
 \begin{itemize}
+	\item \texttt{col sep}: Column separation character in filename.
+		Defaults to \texttt{comma}, and can accept options
+		\texttt{space}, \texttt{tab}, \texttt{comma},
+		\texttt{colon}, \texttt{semicolon}, \texttt{braces},
+		\texttt{\&} and \texttt{ampersand}.
 	\item \texttt{index}: Necessary option, is the name of the column with
 		the data to be plotted.
 	\item \texttt{kernel}: The function to be used for the kernel density
@@ -169,7 +176,7 @@ space-separated columns. The optional argument is a list of options, including:
 		set by \texttt{relative position}.
 	\item Options for average and data points:
 	\begin{itemize}
-		\item \texttt{average marks}, \texttt{points marks}: Mark used
+		\item \texttt{average mark}, \texttt{points mark}: Mark used
 			for averages and points of the data set (defaults
 			to ``\texttt{x}'' and ``\texttt{*}'', respectively).
 		\item \texttt{average size}, \texttt{points size}: Size
@@ -204,21 +211,43 @@ This command will calculate and plot all columns named. The available options
 are:
 
 \begin{itemize}
-	\item \texttt{color}: Primary color utilised. A gradient is built from
+	\item \texttt{primary color}: Primary color utilised. A gradient is built from
 		the secondary color to it. Defaults to black.
 	\item \texttt{secondary color}: Secondary color utilized. A
 		gradient is built from it to the primary color. Defaults
 		to white.
-	\item \texttt{batch indexes}: List of columns to be plotted.
-	\item \texttt{batch spacing}: Distance between plots. Defaults to 1.0.
-	\item \texttt{batch labels}: Labels of the data to be plotted.
+	\item \texttt{indexes}: List of columns to be plotted.
+	\item \texttt{spacing}: Distance between plots. Defaults to 1.0.
+	\item \texttt{labels}: Labels of the data to be plotted.
 \end{itemize}
+
+Besides, the options available to \texttt{{\textbackslash}violinplots} are also
+available for this command; for instance, one might setthe kernel to
+be utilized as the \texttt{uniform} kernel through the option
+\texttt{kernel=uniform}. Of course, \texttt{relative position} is not an option
+here.
 
 \subsection{Examples}
 
 To show the usage of the package, we plotted several data sets two times, in
 figures \ref{graph:violin_verti} and \ref{graph:violin_horiz}, using either the
 simplified or the complete interface.
+
+The data are in the file \texttt{example.dat}, shown below:
+
+\colorlet{mintedbgcsv}{black!10!white}
+
+\inputminted[%
+	frame=single,
+	rulecolor=mintedbgcsv,
+	framesep=10pt,
+	bgcolor=mintedbgcsv,
+	obeytabs,
+	tabsize=12,
+]{text}{example.dat}
+
+First we will plot this data using the simplified interface, resulting in
+figure \ref{graph:violin_verti}.
 
 \begin{figure}[h]
 	\centering
@@ -238,17 +267,22 @@ simplified or the complete interface.
 			ymajorgrids=true,
 		};
 		\violinplotwholefile[%
-			color=orange,
+			primary color=orange,
 			secondary color=black,
-			batch indexes={C,B,A,D,E},
-			batch spacing=1.0,
-			batch labels={%
+			indexes={C,B,A,D,E},
+			spacing=1.0,
+			labels={%
 				$\alpha$,
 				$\beta$,
 				$\gamma$,
 				$\delta$,
 				$\epsilon$
 			},
+			col sep=tab,
+			dataset size=2pt,
+			dataset mark=diamond*,
+			dataset fill=blue!50!black,
+			dataset fill opacity=1.0,
 		]{example.dat}
 	\end{tikzpicture}
 	\caption{Violin plot -- vertical example}
@@ -282,7 +316,7 @@ Code for figure \ref{graph:violin_verti}, using
 			ymajorgrids=true,
 		};
 		\violinplotwholefile[%
-			color=orange,
+			primary color=orange,
 			secondary color=black,
 			batch indexes={C,B,A,D,E},
 			batch spacing=1.0,
@@ -293,10 +327,18 @@ Code for figure \ref{graph:violin_verti}, using
 				$\delta$,
 				$\epsilon$
 			},
+			col sep=tab,
+			dataset size=2pt,
+			dataset mark=diamond*,
+			dataset fill=blue!50!black,
+			dataset fill opacity=1.0,
 		]{example.dat}
 	\end{tikzpicture}
 
 \end{minted}
+
+Then the data will be plotted using the complete interface, resulting
+in figure \ref{graph:violin_horiz}.
 
 \begin{figure}[h]
 	\centering
@@ -321,37 +363,42 @@ Code for figure \ref{graph:violin_verti}, using
 			relative position=1,
 			color=blue!0!black,
 			label={$\alpha$},
-			kernel=logistic,
+			col sep=tab,
 		]{example.dat};
 		\violinplot[%
 			index=B,
 			relative position=2,
 			color=blue!25!black,
 			label={$\beta$},
+			col sep=tab,
 		]{example.dat};
 		\violinplot[%
 			index=A,
 			relative position=3,
 			color=blue!50!black,
 			label={$\gamma$},
+			col sep=tab,
 			kernel=parabolic,
+			samples=100,
 			bandwidth=0.4,
-			average mark=*,
+			average mark=otimes*,
 			average size=2pt,
 			average fill=blue!70!black,
-			average fill opacity=1.0,
+			average fill opacity=0.7,
 		]{example.dat};
 		\violinplot[%
 			index=D,
 			relative position=4,
 			color=blue!75!black,
-			label={$\delta$}
+			label={$\delta$},
+			col sep=tab,
 		]{example.dat};
 		\violinplot[%
 			index=E,
 			relative position=5,
 			color=blue!100!black,
 			label={$\epsilon$},
+			col sep=tab,
 		]{example.dat};
 	\end{tikzpicture}
 	\caption{Violin plot -- horizontal example}
@@ -390,20 +437,23 @@ Code for figure \ref{graph:violin_horiz}, using
 			relative position=1,
 			color=blue!0!black,
 			label={$\alpha$},
-			kernel=logistic,
+			col sep=tab,
 		]{example.dat};
 		\violinplot[%
 			index=B,
 			relative position=2,
 			color=blue!25!black,
 			label={$\beta$},
+			col sep=tab,
 		]{example.dat};
 		\violinplot[%
 			index=A,
 			relative position=3,
 			color=blue!50!black,
 			label={$\gamma$},
+			col sep=tab,
 			kernel=parabolic,
+			samples=100,
 			bandwidth=0.4,
 			average mark=*,
 			average size=2pt,
@@ -415,12 +465,14 @@ Code for figure \ref{graph:violin_horiz}, using
 			relative position=4,
 			color=blue!75!black,
 			label={$\delta$}
+			col sep=tab,
 		]{example.dat};
 		\violinplot[%
 			index=E,
 			relative position=5,
 			color=blue!100!black,
-			label={$\epsilon$}
+			label={$\epsilon$},
+			col sep=tab,
 		]{example.dat};
 	\end{tikzpicture}
 \end{minted}
