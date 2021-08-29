@@ -1,0 +1,13 @@
+*.aux
+*.pdf
+*.log
+*.out
+*.dep
+*.dpth
+*.md5
+*.auxlock
+
+_minted-tikzviolinplots
+
+*.dat
+
