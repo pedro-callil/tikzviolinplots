@@ -427,7 +427,7 @@ figure \ref{graph:violin_verti}.
 			dataset fill opacity=1.0,
 		]{example.dat}
 	\end{tikzpicture}
-	\caption{Violin plot -- vertical example}
+	\caption{Violin plot --- vertical example}
 	\label{graph:violin_verti}
 \end{figure}
 
@@ -545,7 +545,7 @@ in figure \ref{graph:violin_horiz}.
 			col sep=tab,
 		]{example.dat};
 	\end{tikzpicture}
-	\caption{Violin plot -- horizontal example}
+	\caption{Violin plot --- horizontal example}
 	\label{graph:violin_horiz}
 \end{figure}
 
@@ -760,6 +760,89 @@ Figure \ref{graph:violin_annotations} is compiled from the code excerpt below.
 		\end{axis}
 	\end{tikzpicture}
 \end{minted}
+
+\subsubsection{Standalone Kernel Density Estimation}
+
+Plotting only one dataset and choosing adequate plot limits, one
+may obtain a simple representation of a kernel density estimation.
+This can be seen in figure \ref{graph:kde_standalone}, obtained from the
+code excerpt below.
+
+\begin{figure}[h]
+	\centering
+	\begin{tikzpicture}
+		\violinsetoptions[
+			no mirror,
+			reverse axis,
+			data points,
+		]{%
+			xmin=3.3,xmax=4,
+			ymin=-1,ymax=12,
+			title={Plotting Some Data},
+			ylabel={$p(x)$},
+			xlabel={$x$},
+			ymajorgrids=true,
+			ymajorticks=true,
+			ytick={0.0,2.5,5,7.5,10},
+			yticklabels={0.0,2.5,5,7.5,10},
+		};
+		\violinplot[%
+			index=C,
+			relative position=0,
+			color=red!30!black,
+			label={},
+			col sep=tab,
+			dataset size=5pt,
+			dataset color=red!10!black,
+			dataset mark=*,
+			dataset fill=red!90!black,
+			dataset fill opacity=0.2,
+		]{example.dat};
+	\end{tikzpicture}
+	\caption{Standalone kernel density estimation example}
+	\label{graph:kde_standalone}
+\end{figure}
+
+\colorlet{mintedbgstand}{red!10!white}
+
+\begin{minted}[%
+	escapeinside=||,
+	frame=single,
+	rulecolor=mintedbgstand,
+	framesep=10pt,
+	bgcolor=mintedbgstand]{latex}
+	\begin{tikzpicture}
+		\violinsetoptions[
+			no mirror,
+			reverse axis,
+			data points,
+		]{%
+			xmin=3.3,xmax=4,
+			ymin=-1,ymax=12,
+			title={Plotting Some Data},
+			ylabel={$p(x)$},
+			xlabel={$x$},
+			ymajorgrids=true,
+			ymajorticks=true,
+			ytick={0.0,2.5,5,7.5,10},
+			yticklabels={0.0,2.5,5,7.5,10},
+		};
+		\violinplot[%
+			index=C,
+			relative position=0,
+			color=red!30!black,
+			label={},
+			col sep=tab,
+			dataset size=5pt,
+			dataset color=red!10!black,
+			dataset mark=*,
+			dataset fill=red!90!black,
+			dataset fill opacity=0.2,
+		]{example.dat};
+	\end{tikzpicture}
+\end{minted}
+
+
 \section{Limitations}
 
 As the math is handled through \TeX, generating the kernel distribution
