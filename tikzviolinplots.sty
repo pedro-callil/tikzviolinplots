@@ -29,102 +29,6 @@
 \DeclareOption*{\PackageWarning{tikzviolinplots}{Unknown option: ‘\CurrentOption’}}
 \ProcessOptions\relax
 
-\newcommand{\violinsetoptions}[2][]{%
-
-	\def\violin@scaled{FALSE}
-	\def\violin@datapoints{FALSE}
-	\def\violin@averages{FALSE}
-	\def\violin@nomirror{FALSE}
-	\def\violin@reverseaxis{FALSE}
-	\def\violin@axisoptions{#2}
-
-	\@for\kdeoption:=#1\do{
-		\noblanks[q]{\kdeoption}
-		\ifthenelse{
-			\equal{\thestring}{scaled}
-		}{
-			\def\violin@scaled{TRUE}
-		}{}
-		\ifthenelse{
-			\equal{\thestring}{datapoints}
-		}{
-			\def\violin@datapoints{TRUE}
-		}{}
-		\ifthenelse{
-			\equal{\thestring}{averages}
-		}{
-			\def\violin@averages{TRUE}
-		}{}
-		\ifthenelse{
-			\equal{\thestring}{nomirror}
-		}{
-			\def\violin@nomirror{TRUE}
-		}{}
-		\ifthenelse{
-			\equal{\thestring}{reverseaxis}
-		}{
-			\def\violin@reverseaxis{TRUE}
-		}{}
-	}
-
-	\ifthenelse{
-		\equal{\violin@reverseaxis}{TRUE}
-	}{
-		\begin{axis}[
-			\violin@axisoptions,
-			axis on top,
-			yticklabels={,,},
-			ymajorticks=false,
-		]
-		\end{axis}
-	}{
-		\begin{axis}[
-			\violin@axisoptions,
-			axis on top,
-			xticklabels={,,},
-			xmajorticks=false,
-		]
-		\end{axis}
-	}
-
-	\@for\kdeoption:=\violin@axisoptions\do{
-		\noblanks[e]{\kdeoption}
-		\let\violin@opt\thestring
-		\whereisword[q]{\violin@opt}{xmin}
-		\ifthenelse{
-			\equal{\theresult}{0}
-		}{}{
-			\let\violin@axis@xmin\violin@opt
-		}
-		\whereisword[q]{\violin@opt}{xmax}
-		\ifthenelse{
-			\equal{\theresult}{0}
-		}{}{
-			\let\violin@axis@xmax\violin@opt
-		}
-		\whereisword[q]{\violin@opt}{ymin}
-		\ifthenelse{
-			\equal{\theresult}{0}
-		}{}{
-			\let\violin@axis@ymin\violin@opt
-		}
-		\whereisword[q]{\violin@opt}{ymax}
-		\ifthenelse{
-			\equal{\theresult}{0}
-		}{}{
-			\let\violin@axis@ymax\violin@opt
-		}
-	}
-
-	\def\violin@axislimits{
-		\violin@axis@xmin,\violin@axis@xmax,
-		\violin@axis@ymin,\violin@axis@ymax,
-	}
-
-	\let\violin@axisoptions\violin@axislimits
-
-}
-
 \pgfkeys{
 	/violinplot/.is family, /violinplot,
 	default/.style = {
@@ -224,6 +128,102 @@
 	labels/.estore in = \violin@batch@labels,
 }
 
+\newcommand{\violinsetoptions}[2][]{%
+
+	\def\violin@scaled{false}
+	\def\violin@datapoints{false}
+	\def\violin@averages{false}
+	\def\violin@nomirror{false}
+	\def\violin@reverseaxis{false}
+	\def\violin@axisoptions{#2}
+
+	\@for\kdeoption:=#1\do{
+		\noblanks[q]{\kdeoption}
+		\ifthenelse{
+			\equal{\thestring}{scaled}
+		}{
+			\def\violin@scaled{true}
+		}{}
+		\ifthenelse{
+			\equal{\thestring}{datapoints}
+		}{
+			\def\violin@datapoints{true}
+		}{}
+		\ifthenelse{
+			\equal{\thestring}{averages}
+		}{
+			\def\violin@averages{true}
+		}{}
+		\ifthenelse{
+			\equal{\thestring}{nomirror}
+		}{
+			\def\violin@nomirror{true}
+		}{}
+		\ifthenelse{
+			\equal{\thestring}{reverseaxis}
+		}{
+			\def\violin@reverseaxis{true}
+		}{}
+	}
+
+	\ifthenelse{
+		\equal{\violin@reverseaxis}{true}
+	}{
+		\begin{axis}[
+			\violin@axisoptions,
+			axis on top,
+			yticklabels={,,},
+			ymajorticks=false,
+		]
+		\end{axis}
+	}{
+		\begin{axis}[
+			\violin@axisoptions,
+			axis on top,
+			xticklabels={,,},
+			xmajorticks=false,
+		]
+		\end{axis}
+	}
+
+	\@for\kdeoption:=\violin@axisoptions\do{
+		\noblanks[e]{\kdeoption}
+		\let\violin@opt\thestring
+		\whereisword[q]{\violin@opt}{xmin}
+		\ifthenelse{
+			\equal{\theresult}{0}
+		}{}{
+			\let\violin@axis@xmin\violin@opt
+		}
+		\whereisword[q]{\violin@opt}{xmax}
+		\ifthenelse{
+			\equal{\theresult}{0}
+		}{}{
+			\let\violin@axis@xmax\violin@opt
+		}
+		\whereisword[q]{\violin@opt}{ymin}
+		\ifthenelse{
+			\equal{\theresult}{0}
+		}{}{
+			\let\violin@axis@ymin\violin@opt
+		}
+		\whereisword[q]{\violin@opt}{ymax}
+		\ifthenelse{
+			\equal{\theresult}{0}
+		}{}{
+			\let\violin@axis@ymax\violin@opt
+		}
+	}
+
+	\def\violin@axislimits{
+		\violin@axis@xmin,\violin@axis@xmax,
+		\violin@axis@ymin,\violin@axis@ymax,
+	}
+
+	\let\violin@axisoptions\violin@axislimits
+
+}
+
 \newcommand{\violinplot}[2][]{%
 
 	\pgfkeys{/violinplot, default, #1}
@@ -249,7 +249,7 @@
 	}
 
 	\ifthenelse{
-		\equal{\violin@datapoints}{TRUE}
+		\equal{\violin@datapoints}{true}
 	}{
 		\pgfplotstablecreatecol[
 			create col/assign/.code={
@@ -260,7 +260,7 @@
 	}{}
 
 	\ifthenelse{
-		\equal{\violin@reverseaxis}{TRUE}
+		\equal{\violin@reverseaxis}{true}
 	}{
 		\def\violin@axis@x{y}
 		\def\violin@axis@y{x}
@@ -438,7 +438,7 @@
 				\let\cell\pgfplotstablezero
 			}{
 				\ifthenelse{
-					\equal{\violin@nomirror}{TRUE}
+					\equal{\violin@nomirror}{true}
 				}{
 					\pgfmathparse{1.9}
 				}{
@@ -446,7 +446,7 @@
 				}
 				\let\violin@mirror@factor\pgfmathresult
 				\ifthenelse{
-					\equal{\violin@scaled}{TRUE}
+					\equal{\violin@scaled}{true}
 				}{
 					\pgfmathparse{\violin@delta+\violin@mirror@factor*0.5*\cell/\violin@kde@max}
 				}{
@@ -458,7 +458,7 @@
 	}
 
 	\ifthenelse{
-		\equal{\violin@nomirror}{FALSE}
+		\equal{\violin@nomirror}{false}
 	}{
 		\pgfplotstablecreatecol[
 			create col/assign/.code={
@@ -470,7 +470,7 @@
 	}{}
 
 	\ifthenelse{
-		\equal{\violin@reverseaxis}{TRUE}
+		\equal{\violin@reverseaxis}{true}
 	}{
 		\pgfkeys{
 			/pgfplots/xticklabels={,,},
@@ -503,7 +503,7 @@
 			\violin@axis@x=kdecol, \violin@axis@y=list
 		] {\violin@kde};
 		\ifthenelse{
-			\equal{\violin@nomirror}{FALSE}
+			\equal{\violin@nomirror}{false}
 		}{
 			\addplot[
 				no marks,
@@ -520,29 +520,33 @@
 			] {\violin@kde};
 		}{}
 		\ifthenelse{
-			\equal{\violin@reverseaxis}{FALSE}
-		}{
-			\addplot[
-				no marks,
-				color=black,
-			] coordinates {
-				(\violin@delta,\pgfkeysvalueof{/pgfplots/ymin})%
-				(\violin@delta,\pgfkeysvalueof{/pgfplots/ymax})
-			};
-		}{
-			\addplot[
-				no marks,
-				color=black,
-			] coordinates {
-				(\pgfkeysvalueof{/pgfplots/xmin},\violin@delta)%
-				(\pgfkeysvalueof{/pgfplots/xmax},\violin@delta)
-			};
-		}
-		\ifthenelse{
-			\equal{\violin@averages}{TRUE}
+			\equal{\violin@nomirror}{true}
 		}{
 			\ifthenelse{
-				\equal{\violin@reverseaxis}{TRUE}
+				\equal{\violin@reverseaxis}{false}
+			}{
+				\addplot[
+					no marks,
+					color=black,
+				] coordinates {
+					(\violin@delta,\pgfkeysvalueof{/pgfplots/ymin})%
+					(\violin@delta,\pgfkeysvalueof{/pgfplots/ymax})
+				};
+			}{
+				\addplot[
+					no marks,
+					color=black,
+				] coordinates {
+					(\pgfkeysvalueof{/pgfplots/xmin},\violin@delta)%
+					(\pgfkeysvalueof{/pgfplots/xmax},\violin@delta)
+				};
+			}
+		}{}
+		\ifthenelse{
+			\equal{\violin@averages}{true}
+		}{
+			\ifthenelse{
+				\equal{\violin@reverseaxis}{true}
 			}{
 				\addplot[
 					only marks,
@@ -570,7 +574,7 @@
 			}
 		}{}
 		\ifthenelse{
-			\equal{\violin@datapoints}{TRUE}
+			\equal{\violin@datapoints}{true}
 		}{
 			\addplot[
 				only marks,

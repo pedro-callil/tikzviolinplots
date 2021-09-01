@@ -19,16 +19,45 @@
 \documentclass{article}
 
 \usepackage{pgfplots}
-\pgfplotsset{width=0.9\linewidth,compat=1.18}
+\pgfplotsset{width=\textwidth,compat=1.18}
+\usepgfplotslibrary{statistics}
 \usepackage{tikzviolinplots}
 %\usepgfplotslibrary{external}
 %\tikzexternalize
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{decorations.text}
+\usetikzlibrary{decorations.pathmorphing}
 \usepackage{minted}
 \usemintedstyle{tango}
 \usepackage{amsmath}
 \usepackage{scontents}
 \usepackage{microtype}
+\usepackage{subcaption}
 \usepackage{hyperref}
+
+\begin{scontents}[write-out=violinandboxplotexample.dat]
+A	B	C	D
+0.876	0.574	2.175	1.684
+1.015	0.822	2.121	2.290
+0.995	1.266	1.916	2.184
+1.101	0.740	2.044	2.065
+1.222	0.636	2.004	2.248
+0.712	1.753	2.038	2.200
+1.063	0.873	1.974	1.865
+0.973	1.020	2.145	1.895
+1.174	0.763	2.052	2.240
+1.057	1.293	2.079	2.360
+1.004	0.853	2.064	1.695
+0.909	0.694	2.136	1.837
+1.108	0.849	2.000	1.744
+1.210	0.468	2.010	1.820
+0.958	0.767	1.824	2.158
+1.119	0.940	2.034	1.846
+1.000	0.962	1.967	2.545
+0.954	1.551	1.833	1.816
+0.918	0.755	1.914	2.369
+1.093	0.973	1.997	1.543
+\end{scontents}
 
 \begin{scontents}[write-out=example.dat]
 A	B	C	D	E
@@ -60,6 +89,8 @@ A	B	C	D	E
 
 \maketitle
 
+\tableofcontents
+
 \begin{abstract}
 	The package provides commands for violin plot creation and
 	the kernel density estimations required.
@@ -70,17 +101,108 @@ A	B	C	D	E
 This package, through the use of the package \texttt{pgfplots}, allows the
 creation of violin plots in \LaTeX. Violin plots are similar to boxplots,
 but instead of a box signalling the average and quartiles, a kernel density
-estimator is plotted, as in formula \ref{eq:kde}, in which the kernel is a
-probability distribution (available are the gaussian, uniform, logistic,
-triangular and parabolic distributions).
+estimator is plotted, as in equation \ref{eq:kde}, in which the function $k$
+(the kernel) is a probability distribution, the positive number $h$ (the
+bandwidth) is a smoothing factor and $n$ is the sample size.
 
 \begin{equation}
 	\label{eq:kde}
 	\textnormal{KDE}(x) = %
-	\cfrac{1}{nh}\sum_{i=1}^n\textnormal{kernel}\left(\cfrac{x-x_i}{h}\right)
+	\cfrac{1}{nh}\sum_{i=1}^nk\left(\cfrac{x-x_i}{h}\right)
 \end{equation}
 
-\section{Usage}
+A comparison between the two plots, showcasing its similarities, is
+shown in figures \ref{fig:example}. The violin plot in figure
+\ref{graph:violin_example} assumes normal data, and the bandwidth
+(smoothing factor $h$ in equation \ref{eq:kde}) is defined accordingly.
+
+\begin{figure}[h!]
+	\centering
+	\begin{subfigure}{0.5\textwidth}
+		\centering
+		\begin{tikzpicture}
+			\begin{axis}
+				[
+					boxplot/draw direction=y,
+					ymax=3, ymin=0,
+					xmin=0, xmax=5,
+					ymajorgrids=true,
+					xtick={1,2,3,4},
+					xticklabels={$\alpha$,$\beta$,$\gamma$,$\delta$},
+				]
+				\addplot+[boxplot,
+					blue!100!red,
+					fill=blue!100!red,
+					fill opacity=0.50,
+					no marks]
+					table [y=A] {violinandboxplotexample.dat};
+				\addplot+[boxplot,
+					blue!66!red,
+					fill=blue!66!red,
+					fill opacity=0.50,
+					no marks]
+					table [y=B] {violinandboxplotexample.dat};
+				\addplot+[boxplot,
+					blue!33!red,
+					fill=blue!33!red,
+					fill opacity=0.50,
+					no marks]
+					table [y=C] {violinandboxplotexample.dat};
+				\addplot+[boxplot,
+					blue!0!red,
+					fill=blue!0!red,
+					fill opacity=0.50,
+					no marks]
+					table [y=D] {violinandboxplotexample.dat};
+			\end{axis}
+		\end{tikzpicture}
+		\caption{Box plot}
+		\label{graph:box_example}
+	\end{subfigure}%
+	\hfill%
+	\begin{subfigure}{0.5\textwidth}
+		\centering
+		\begin{tikzpicture}
+			\violinsetoptions[
+				averages,
+				data points,
+				scaled,
+			]{
+				xmin=0,xmax=5,
+				ymin=0,ymax=3,
+				xlabel style={
+					yshift = {-2*height("a")}
+				},
+				ymajorgrids=true,
+			};
+			\violinplotwholefile[%
+				primary color=red,
+				secondary color=blue,
+				indexes={A,B,C,D},
+				spacing=1.0,
+				labels={%
+					$\alpha$,
+					$\beta$,
+					$\gamma$,
+					$\delta$,
+				},
+				col sep=tab,
+				dataset size=1pt,
+				dataset mark=*,
+				dataset fill=black!50!white,
+				dataset fill opacity=1.0,
+				average mark=x,
+				average size=5pt,
+			]{violinandboxplotexample.dat}
+		\end{tikzpicture}
+		\caption{Violin plot}
+		\label{graph:violin_example}
+	\end{subfigure}
+	\caption{Box and violin plot examples}
+	\label{fig:example}
+\end{figure}
+
+\section{Usage \& Examples}
 
 To plot a violin plot with the commands provided, one must, inside
 a \texttt{tikzpicture} environment, set the general options to all
@@ -240,7 +362,7 @@ are:
 \end{itemize}
 
 Besides, the options available to \texttt{{\textbackslash}violinplots} are also
-available for this command; for instance, one might setthe kernel to
+available for this command; for instance, one might set the kernel to
 be utilized as the \texttt{uniform} kernel through the option
 \texttt{kernel=uniform}. Of course, \texttt{relative position} is not an option
 here.
@@ -252,6 +374,8 @@ figures \ref{graph:violin_verti} and \ref{graph:violin_horiz}, using either the
 simplified or the complete interface.
 
 The data are in the file \texttt{example.dat}, shown below:
+
+\subsubsection{Simplified Interface}
 
 \colorlet{mintedbgcsv}{black!10!white}
 
@@ -348,12 +472,14 @@ Code for figure \ref{graph:violin_verti}, using
 			col sep=tab,
 			dataset size=2pt,
 			dataset mark=diamond*,
-			dataset fill=blue!50!black,
+			dataset fill=blue!50!white,
 			dataset fill opacity=1.0,
 		]{example.dat}
 	\end{tikzpicture}
 
 \end{minted}
+
+\subsubsection{Complete Interface}
 
 Then the data will be plotted using the complete interface, resulting
 in figure \ref{graph:violin_horiz}.
@@ -473,16 +599,16 @@ Code for figure \ref{graph:violin_horiz}, using
 			kernel=parabolic,
 			samples=100,
 			bandwidth=0.4,
-			average mark=*,
+			average mark=otimes*,
 			average size=2pt,
 			average fill=blue!70!black,
-			average fill opacity=1.0,
+			average fill opacity=0.7,
 		]{example.dat};
 		\violinplot[%
 			index=D,
 			relative position=4,
 			color=blue!75!black,
-			label={$\delta$}
+			label={$\delta$},
 			col sep=tab,
 		]{example.dat};
 		\violinplot[%
@@ -494,5 +620,161 @@ Code for figure \ref{graph:violin_horiz}, using
 		]{example.dat};
 	\end{tikzpicture}
 \end{minted}
+
+\subsubsection{Drawings and Annotations}
+
+As everything happens inside a \texttt{tikzpicture} environment, drawings
+and annotations are straightforward, as seen in figure \ref{graph:violin_annotations}.
+
+\begin{figure}[h]
+	\centering
+	\begin{tikzpicture}
+		\violinsetoptions[
+			averages,
+			data points,
+		]{
+			xmin=0,xmax=6,
+			ymin=-2,ymax=5,
+			xlabel = {Bandwith choice},
+			ylabel = {Some property},
+			title={Problems with Different Distributions},
+			xlabel style={
+				yshift = {-3*height("a")}
+			},
+			ymajorgrids=true,
+		};
+		\violinplot[%
+			index=A,
+			relative position=1,
+			color=green!33!black,
+			label={Estimated bandwidth},
+			col sep=tab,
+		]{example.dat};
+		\violinplot[%
+			index=A,
+			bandwidth=0.1,
+			relative position=4,
+			color=green!12!black,
+			label={Smaller bandwidth},
+			col sep=tab,
+		]{example.dat};
+		\begin{axis}[
+			xmin=0,xmax=6,
+			ymin=-2,ymax=5,
+		]
+			\draw[-{Stealth}] (axis cs: 1.75,0.45) %
+				.. controls (axis cs:1.75,0.85) and %
+				(axis cs:3.9,0.5) .. (axis cs: 3.9,1.05);
+			\draw[decoration={raise=2pt,text along path, text=%
+				{|\tiny| Better bandwidth}, text align={center}}, %
+				decorate] %
+				(axis cs: 1.75,0.45) %
+				.. controls (axis cs:1.75,0.85) and %
+				(axis cs:3.9,0.5) .. (axis cs: 3.9,1.05);
+			\draw[-{Stealth}] %
+				(axis cs: 1.5,0.45) .. controls (axis cs:1.5,0.85) %
+				and (axis cs:1.25,1.1) .. (axis cs: 1.25,1.5) .. %
+				controls (axis cs:1.25,1.9) and (axis cs:1.35,1.9) %
+				.. (axis cs:1.35,2.6);
+			\draw[decoration={raise=2pt,text along path, text=%
+				{|\tiny|Very oversmoothed}, text align={center}}, %
+				decorate] %
+				(axis cs: 1.35,2.6) .. controls (axis cs:1.35,1.9) %
+				and (axis cs:1.25,1.9) .. (axis cs: 1.25,1.5) .. %
+				controls (axis cs:1.25,1.1) and (axis cs:1.5,0.85) %
+				.. (axis cs:1.5,0.45);
+		\end{axis}
+	\end{tikzpicture}
+	\caption{Annotations in a plot}
+	\label{graph:violin_annotations}
+\end{figure}
+
+Figure \ref{graph:violin_annotations} is compiled from the code excerpt below.
+
+\colorlet{mintedbgannot}{green!10!white}
+
+\begin{minted}[%
+	escapeinside=||,
+	frame=single,
+	rulecolor=mintedbgannot,
+	framesep=10pt,
+	bgcolor=mintedbgannot]{latex}
+	\begin{tikzpicture}
+		\violinsetoptions[
+			averages,
+			data points,
+		]{
+			xmin=0,xmax=6,
+			ymin=-2,ymax=5,
+			xlabel = {Bandwith choice},
+			ylabel = {Some property},
+			title={Problems with Different %
+				Distributions},
+			xlabel style={
+				yshift = {-3*height("a")}
+			},
+			ymajorgrids=true,
+		};
+		\violinplot[%
+			index=A,
+			relative position=1,
+			color=green!33!black,
+			label={Estimated bandwidth},
+			col sep=tab,
+		]{example.dat};
+		\violinplot[%
+			index=A,
+			bandwidth=0.1,
+			relative position=4,
+			color=green!12!black,
+			label={Smaller bandwidth},
+			col sep=tab,
+		]{example.dat};
+		\begin{axis}[
+			xmin=0,xmax=6,
+			ymin=-2,ymax=5,
+		]
+		\draw[-{Stealth}] (axis cs: 1.75,0.45) %
+		.. controls (axis cs:1.75,0.85) and %
+		(axis cs:3.9,0.5) .. (axis cs: 3.9,1.05);
+		\draw[decoration={raise=2pt,text along path,%
+		text={|\tiny| Better bandwidth}, %
+		text align={center}}, decorate] %
+		(axis cs: 1.75,0.45) %
+		.. controls (axis cs:1.75,0.85) and %
+		(axis cs:3.9,0.5) .. (axis cs: 3.9,1.05);
+		\draw[-{Stealth}] %
+		(axis cs: 1.5,0.45) .. controls %
+		(axis cs:1.5,0.85) and (axis cs:1.25,1.1) %
+		.. (axis cs: 1.25,1.5) .. controls %
+		(axis cs:1.25,1.9) and (axis cs:1.35,1.9) %
+		.. (axis cs:1.35,2.6);
+		\draw[decoration={raise=2pt,text along path, %
+		text={|\tiny|Very oversmoothed}, %
+		text align={center}}, decorate] %
+		(axis cs: 1.35,2.6) .. controls %
+		(axis cs:1.35,1.9) and (axis cs:1.25,1.9) %
+		.. (axis cs: 1.25,1.5) .. %
+		controls (axis cs:1.25,1.1) and %
+		(axis cs:1.5,0.85) .. (axis cs:1.5,0.45);
+		\end{axis}
+	\end{tikzpicture}
+\end{minted}
+\section{Limitations}
+
+As the math is handled through \TeX, generating the kernel distribution
+estimations is a slow process; therefore, if possible, the number of samples
+should not be very large. Also, each value should not, itself, be too large,
+to avoid ``dimension too large'' errors. In this case, the data should be scaled
+and the tick labels manually corrected.
+
+As each violin plot is rendered in a different \texttt{axis} environment,
+the positions of the axes' labels are not, usually, correct. One should
+set it manually. In the examples, this was accomplished setting the vertical/
+horizontal shift to twice the height of a letter, in the direction opposite
+to the appropriate axis.
+
+For the same reason, the options \texttt{xmin}, \texttt{ymin}, \texttt{xmax}
+and \texttt{ymax} are required; no automatic placement is performed.
 
 \end{document}
