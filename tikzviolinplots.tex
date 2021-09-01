@@ -21,8 +21,8 @@
 \usepackage{pgfplots}
 \pgfplotsset{width=0.9\linewidth,compat=1.18}
 \usepackage{tikzviolinplots}
-\usepgfplotslibrary{external}
-\tikzexternalize
+%\usepgfplotslibrary{external}
+%\tikzexternalize
 \usepackage{minted}
 \usemintedstyle{tango}
 \usepackage{amsmath}
@@ -299,7 +299,7 @@ figure \ref{graph:violin_verti}.
 			col sep=tab,
 			dataset size=2pt,
 			dataset mark=diamond*,
-			dataset fill=blue!50!black,
+			dataset fill=blue!50!white,
 			dataset fill opacity=1.0,
 		]{example.dat}
 	\end{tikzpicture}

@@ -148,11 +148,6 @@
 		dataset opacity=1.0,
 		dataset fill=black,
 		dataset fill opacity=0.2,
-		spacing=1.0,
-		indexes={A,B,C},
-		primary color=blue,
-		secondary color=black,
-		labels={A,B,C},
 	},
 	col sep/.estore in = \violin@colsep,
 	kernel/.estore in = \violin@kernel,
@@ -174,6 +169,54 @@
 	dataset opacity/.estore in = \violin@pts@opacity,
 	dataset fill/.estore in = \violin@pts@fillcolor,
 	dataset fill opacity/.estore in = \violin@pts@fillopacity,
+	/violinplotwholefile/.is family, /violinplotwholefile,
+	default/.style = {
+		col sep=comma,
+		kernel=gaussian,
+		bandwidth=NONE,
+		index=DATA,
+		samples=50,
+		relative position=0
+		color=black,
+		label={LABEL},
+		average mark=x,
+		average size=3pt,
+		average color=black,
+		average opacity=1.0,
+		average fill=white,
+		average fill opacity=0.5,
+		dataset mark=*,
+		dataset size=1pt,
+		dataset color=black,
+		dataset opacity=1.0,
+		dataset fill=black,
+		dataset fill opacity=0.2,
+		spacing=1.0,
+		indexes={A,B,C},
+		primary color=blue,
+		secondary color=black,
+		labels={A,B,C},
+	},
+	col sep/.estore in = \violin@batch@colsep,
+	kernel/.estore in = \violin@batch@kernel,
+	bandwidth/.estore in = \violin@batch@bandwidth,
+	index/.estore in = \violin@batch@index,
+	samples/.estore in = \violin@batch@samples,
+	relative position/.estore in = \violin@batch@delta,
+	color/.estore in = \violin@batch@color,
+	label/.estore in = \violin@batch@label,
+	average mark/.estore in = \violin@batch@avg@mark,
+	average size/.estore in = \violin@batch@avg@size,
+	average color/.estore in = \violin@batch@avg@color,
+	average opacity/.estore in = \violin@batch@avg@opacity,
+	average fill/.estore in = \violin@batch@avg@fillcolor,
+	average fill opacity/.estore in = \violin@batch@avg@fillopacity,
+	dataset mark/.estore in = \violin@batch@pts@mark,
+	dataset size/.estore in = \violin@batch@pts@size,
+	dataset color/.estore in = \violin@batch@pts@color,
+	dataset opacity/.estore in = \violin@batch@pts@opacity,
+	dataset fill/.estore in = \violin@batch@pts@fillcolor,
+	dataset fill opacity/.estore in = \violin@batch@pts@fillopacity,
 	spacing/.estore in = \violin@batch@delta,
 	indexes/.estore in = \violin@batch@indexes,
 	primary color/.estore in = \violin@batch@color@primary,
@@ -566,7 +609,7 @@
 
 \newcommand{\violinplotwholefile}[2][]{%
 
-	\pgfkeys{/violinplot, default, #1}
+	\pgfkeys{/violinplotwholefile, default, #1}
 	\def\violin@batch@filename{#2}
 
 	\pgfmathparse{0}
@@ -593,64 +636,28 @@
 		\pgfmathparse{1+\violin@batch@counter*\violin@batch@delta}
 		\let\violin@batch@relativepos\pgfmathresult
 
-		\let\violin@colsep@temp\violin@colsep
-		\let\violin@kernel@temp\violin@kernel
-		\let\violin@bandwidth@temp\violin@bandwidth
-		\let\violin@samples@temp\violin@samples
-		\let\violin@avg@mark@temp\violin@avg@mark
-		\let\violin@avg@size@temp\violin@avg@size
-		\let\violin@avg@color@temp\violin@avg@color
-		\let\violin@avg@opacity@temp\violin@avg@opacity
-		\let\violin@avg@fillcolor@temp\violin@avg@fillcolor
-		\let\violin@avg@fillopacity@temp\violin@avg@fillopacity
-		\let\violin@pts@mark@temp\violin@pts@mark
-		\let\violin@pts@size@temp\violin@pts@size
-		\let\violin@pts@color@temp\violin@pts@color
-		\let\violin@pts@opacity@temp\violin@pts@opacity
-		\let\violin@pts@fillcolor@temp\violin@pts@fillcolor
-		\let\violin@pts@fillopacity@temp\violin@pts@fillopacity
-
 		\violinplot[%
-			col sep = \violin@colsep@temp,
-			bandwidth=\violin@bandwidth@temp,
-			kernel = \violin@kernel@temp,
+			col sep = \violin@batch@colsep,
+			bandwidth=\violin@batch@bandwidth,
+			kernel = \violin@batch@kernel,
 			index=\violin@batch@index,
 			relative position=\violin@batch@relativepos,
-			samples = \violin@samples@temp,
+			samples = \violin@batch@samples,
 			color=\violin@batch@color,
 			label={\violin@batch@label},
-			average mark = \violin@avg@mark@temp,
-			average size = \violin@avg@size@temp,
-			average color = \violin@avg@color@temp,
-			average opacity = \violin@avg@opacity@temp,
-			average fill = \violin@avg@fillcolor@temp,
-			average fill opacity = \violin@avg@fillopacity@temp,
-			dataset mark = \violin@pts@mark@temp,
-			dataset size = \violin@pts@size@temp,
-			dataset color = \violin@pts@color@temp,
-			dataset opacity = \violin@pts@opacity@temp,
-			dataset fill = \violin@pts@fillcolor@temp,
-			dataset fill opacity = \violin@pts@fillopacity@temp,
+			average mark = \violin@batch@avg@mark,
+			average size = \violin@batch@avg@size,
+			average color = \violin@batch@avg@color,
+			average opacity = \violin@batch@avg@opacity,
+			average fill = \violin@batch@avg@fillcolor,
+			average fill opacity = \violin@batch@avg@fillopacity,
+			dataset mark = \violin@batch@pts@mark,
+			dataset size = \violin@batch@pts@size,
+			dataset color = \violin@batch@pts@color,
+			dataset opacity = \violin@batch@pts@opacity,
+			dataset fill = \violin@batch@pts@fillcolor,
+			dataset fill opacity = \violin@batch@pts@fillopacity,
 		]{\violin@batch@filename};
-
-		\let\violin@colsep\violin@colsep@temp
-		\let\violin@kernel\violin@kernel@temp
-		\let\violin@bandwidth\violin@bandwidth@temp
-		\let\violin@samples\violin@samples@temp
-		\let\violin@avg@mark\violin@avg@mark@temp
-		\let\violin@avg@size\violin@avg@size@temp
-		\let\violin@avg@color\violin@avg@color@temp
-		\let\violin@avg@opacity\violin@avg@opacity@temp
-		\let\violin@avg@fillcolor\violin@avg@fillcolor@temp
-		\let\violin@avg@fillopacity\violin@avg@fillopacity@temp
-		\let\violin@pts@mark\violin@pts@mark@temp
-		\let\violin@pts@size\violin@pts@size@temp
-		\let\violin@pts@color\violin@pts@color@temp
-		\let\violin@pts@opacity\violin@pts@opacity@temp
-		\let\violin@pts@fillcolor\violin@pts@fillcolor@temp
-		\let\violin@pts@fillopacity\violin@pts@fillopacity@temp
-
-		\pgfkeys{/violinplot, default, #1}
 
 		\pgfmathparse{int(\violin@batch@counter+1)}
 		\let\violin@batch@counter\pgfmathresult
