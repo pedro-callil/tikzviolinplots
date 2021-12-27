@@ -17,7 +17,7 @@
 % tikzviolinplots.tex.
 
 \NeedsTeXFormat{LaTeX2e}[1994/06/01]
-\ProvidesPackage{tikzviolinplots}[2021/08/27 v0.6 Violin plot creation in pgfplots]
+\ProvidesPackage{tikzviolinplots}[2021/08/27 v0.6.1 Violin plot creation in pgfplots]
 
 \RequirePackage{pgfplots}
 \RequirePackage{pgfplotstable}
@@ -661,7 +661,7 @@
 			dataset opacity = \violin@batch@pts@opacity,
 			dataset fill = \violin@batch@pts@fillcolor,
 			dataset fill opacity = \violin@batch@pts@fillopacity,
-		]{\violin@batch@filename};
+		]{\violin@batch@filename}
 
 		\pgfmathparse{int(\violin@batch@counter+1)}
 		\let\violin@batch@counter\pgfmathresult

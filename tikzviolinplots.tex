@@ -22,13 +22,13 @@
 \pgfplotsset{width=\textwidth,compat=1.18}
 \usepgfplotslibrary{statistics}
 \usepackage{tikzviolinplots}
-%\usepgfplotslibrary{external}
-%\tikzexternalize
+\usepgfplotslibrary{external}
+\tikzexternalize
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{decorations.text}
 \usetikzlibrary{decorations.pathmorphing}
 \usepackage{minted}
-\usemintedstyle{tango}
+\usemintedstyle{gruvbox-light}
 \usepackage{amsmath}
 \usepackage{scontents}
 \usepackage{microtype}
@@ -116,6 +116,8 @@ shown in figures \ref{fig:example}. The violin plot in figure
 \ref{graph:violin_example} assumes normal data, and the bandwidth
 (smoothing factor $h$ in equation \ref{eq:kde}) is defined accordingly.
 
+\pgfplotsset{height=1.6\linewidth}
+
 \begin{figure}[h!]
 	\centering
 	\begin{subfigure}{0.5\textwidth}
@@ -129,6 +131,7 @@ shown in figures \ref{fig:example}. The violin plot in figure
 					ymajorgrids=true,
 					xtick={1,2,3,4},
 					xticklabels={$\alpha$,$\beta$,$\gamma$,$\delta$},
+					ylabel={Some property},
 				]
 				\addplot+[boxplot,
 					blue!100!red,
@@ -174,7 +177,8 @@ shown in figures \ref{fig:example}. The violin plot in figure
 					yshift = {-2*height("a")}
 				},
 				ymajorgrids=true,
-			};
+				ylabel={Same property},
+			}
 			\violinplotwholefile[%
 				primary color=red,
 				secondary color=blue,
@@ -202,7 +206,9 @@ shown in figures \ref{fig:example}. The violin plot in figure
 	\label{fig:example}
 \end{figure}
 
-\section{Usage \& Examples}
+\pgfplotsset{height=0.9\linewidth}
+
+\section{Usage}
 
 To plot a violin plot with the commands provided, one must, inside
 a \texttt{tikzpicture} environment, set the general options to all
@@ -342,9 +348,9 @@ If the data sets are similar and no customizations are required, one might
 use the command \texttt{{\textbackslash}violinplotwholefile}.
 
 \begin{minted}[escapeinside=||]{latex}
-	\violinplotwholefile[%
-		|\textit{<option>}=\textit{<value>}|
-	]{|\textit{filename}|}
+\violinplotwholefile[%
+	|\textit{<option>}=\textit{<value>}|
+]{|\textit{filename}|}
 \end{minted}
 
 This command will calculate and plot all columns named. The available options
@@ -367,15 +373,13 @@ be utilized as the \texttt{uniform} kernel through the option
 \texttt{kernel=uniform}. Of course, \texttt{relative position} is not an option
 here.
 
-\subsection{Examples}
+\section{Examples}
 
 To show the usage of the package, we plotted several data sets two times, in
 figures \ref{graph:violin_verti} and \ref{graph:violin_horiz}, using either the
 simplified or the complete interface.
 
 The data are in the file \texttt{example.dat}, shown below:
-
-\subsubsection{Simplified Interface}
 
 \colorlet{mintedbgcsv}{black!10!white}
 
@@ -387,6 +391,8 @@ The data are in the file \texttt{example.dat}, shown below:
 	obeytabs,
 	tabsize=12,
 ]{text}{example.dat}
+
+\subsection{Simplified Interface}
 
 First we will plot this data using the simplified interface, resulting in
 figure \ref{graph:violin_verti}.
@@ -407,7 +413,7 @@ figure \ref{graph:violin_verti}.
 				yshift = {-2*height("a")}
 			},
 			ymajorgrids=true,
-		};
+		}
 		\violinplotwholefile[%
 			primary color=orange,
 			secondary color=black,
@@ -442,44 +448,44 @@ Code for figure \ref{graph:violin_verti}, using
 	rulecolor=mintedbgverti,
 	framesep=10pt,
 	bgcolor=mintedbgverti]{latex}
-	\begin{tikzpicture}
-		\violinsetoptions[
-			data points,
-			scaled,
-		]{
-			xmin=0,xmax=6,
-			ymin=-4,ymax=6,
-			title={Plotting Some Data},
-			xlabel={Groups},
-			ylabel={Some property},
-			xlabel style={
-				yshift = {-2*height("a")}
-			},
-			ymajorgrids=true,
-		};
-		\violinplotwholefile[%
-			primary color=orange,
-			secondary color=black,
-			batch indexes={C,B,A,D,E},
-			batch spacing=1.0,
-			batch labels={%
-				$\alpha$,
-				$\beta$,
-				$\gamma$,
-				$\delta$,
-				$\epsilon$
-			},
-			col sep=tab,
-			dataset size=2pt,
-			dataset mark=diamond*,
-			dataset fill=blue!50!white,
-			dataset fill opacity=1.0,
-		]{example.dat}
-	\end{tikzpicture}
+\begin{tikzpicture}
+	\violinsetoptions[
+		data points,
+		scaled,
+	]{
+		xmin=0,xmax=6,
+		ymin=-4,ymax=6,
+		title={Plotting Some Data},
+		xlabel={Groups},
+		ylabel={Some property},
+		xlabel style={
+			yshift = {-2*height("a")}
+		},
+		ymajorgrids=true,
+	}
+	\violinplotwholefile[%
+		primary color=orange,
+		secondary color=black,
+		batch indexes={C,B,A,D,E},
+		batch spacing=1.0,
+		batch labels={%
+			$\alpha$,
+			$\beta$,
+			$\gamma$,
+			$\delta$,
+			$\epsilon$
+		},
+		col sep=tab,
+		dataset size=2pt,
+		dataset mark=diamond*,
+		dataset fill=blue!50!white,
+		dataset fill opacity=1.0,
+	]{example.dat}
+\end{tikzpicture}
 
 \end{minted}
 
-\subsubsection{Complete Interface}
+\subsection{Complete Interface}
 
 Then the data will be plotted using the complete interface, resulting
 in figure \ref{graph:violin_horiz}.
@@ -501,21 +507,21 @@ in figure \ref{graph:violin_horiz}.
 				yshift = {2*width("a")}
 			},
 			xmajorgrids=true,
-		};
+		}
 		\violinplot[%
 			index=C,
 			relative position=1,
 			color=blue!0!black,
 			label={$\alpha$},
 			col sep=tab,
-		]{example.dat};
+		]{example.dat}
 		\violinplot[%
 			index=B,
 			relative position=2,
 			color=blue!25!black,
 			label={$\beta$},
 			col sep=tab,
-		]{example.dat};
+		]{example.dat}
 		\violinplot[%
 			index=A,
 			relative position=3,
@@ -529,21 +535,21 @@ in figure \ref{graph:violin_horiz}.
 			average size=2pt,
 			average fill=blue!70!black,
 			average fill opacity=0.7,
-		]{example.dat};
+		]{example.dat}
 		\violinplot[%
 			index=D,
 			relative position=4,
 			color=blue!75!black,
 			label={$\delta$},
 			col sep=tab,
-		]{example.dat};
+		]{example.dat}
 		\violinplot[%
 			index=E,
 			relative position=5,
 			color=blue!100!black,
 			label={$\epsilon$},
 			col sep=tab,
-		]{example.dat};
+		]{example.dat}
 	\end{tikzpicture}
 	\caption{Violin plot --- horizontal example}
 	\label{graph:violin_horiz}
@@ -560,68 +566,68 @@ Code for figure \ref{graph:violin_horiz}, using
 	rulecolor=mintedbghoriz,
 	framesep=10pt,
 	bgcolor=mintedbghoriz]{latex}
-	\begin{tikzpicture}
-		\violinsetoptions[
-			no mirror,
-			averages,
-			reverse axis,
-		]{%
-			xmin=-4,xmax=6,
-			ymin=0.7,ymax=7,
-			title={Plotting Some Data},
-			ylabel={Groups},
-			xlabel={Some property},
-			ylabel style={
-				yshift = {2*width("a")}
-			},
-			xmajorgrids=true,
-		};
-		\violinplot[%
-			index=C,
-			relative position=1,
-			color=blue!0!black,
-			label={$\alpha$},
-			col sep=tab,
-		]{example.dat};
-		\violinplot[%
-			index=B,
-			relative position=2,
-			color=blue!25!black,
-			label={$\beta$},
-			col sep=tab,
-		]{example.dat};
-		\violinplot[%
-			index=A,
-			relative position=3,
-			color=blue!50!black,
-			label={$\gamma$},
-			col sep=tab,
-			kernel=parabolic,
-			samples=100,
-			bandwidth=0.4,
-			average mark=otimes*,
-			average size=2pt,
-			average fill=blue!70!black,
-			average fill opacity=0.7,
-		]{example.dat};
-		\violinplot[%
-			index=D,
-			relative position=4,
-			color=blue!75!black,
-			label={$\delta$},
-			col sep=tab,
-		]{example.dat};
-		\violinplot[%
-			index=E,
-			relative position=5,
-			color=blue!100!black,
-			label={$\epsilon$},
-			col sep=tab,
-		]{example.dat};
-	\end{tikzpicture}
+\begin{tikzpicture}
+	\violinsetoptions[
+		no mirror,
+		averages,
+		reverse axis,
+	]{%
+		xmin=-4,xmax=6,
+		ymin=0.7,ymax=7,
+		title={Plotting Some Data},
+		ylabel={Groups},
+		xlabel={Some property},
+		ylabel style={
+			yshift = {2*width("a")}
+		},
+		xmajorgrids=true,
+	}
+	\violinplot[%
+		index=C,
+		relative position=1,
+		color=blue!0!black,
+		label={$\alpha$},
+		col sep=tab,
+	]{example.dat}
+	\violinplot[%
+		index=B,
+		relative position=2,
+		color=blue!25!black,
+		label={$\beta$},
+		col sep=tab,
+	]{example.dat}
+	\violinplot[%
+		index=A,
+		relative position=3,
+		color=blue!50!black,
+		label={$\gamma$},
+		col sep=tab,
+		kernel=parabolic,
+		samples=100,
+		bandwidth=0.4,
+		average mark=otimes*,
+		average size=2pt,
+		average fill=blue!70!black,
+		average fill opacity=0.7,
+	]{example.dat};
+	\violinplot[%
+		index=D,
+		relative position=4,
+		color=blue!75!black,
+		label={$\delta$},
+		col sep=tab,
+	]{example.dat}
+	\violinplot[%
+		index=E,
+		relative position=5,
+		color=blue!100!black,
+		label={$\epsilon$},
+		col sep=tab,
+	]{example.dat}
+\end{tikzpicture}
 \end{minted}
 
-\subsubsection{Drawings and Annotations}
+\subsection{Drawings and Annotations}
 
 As everything happens inside a \texttt{tikzpicture} environment, drawings
 and annotations are straightforward, as seen in figure \ref{graph:violin_annotations}.
@@ -642,14 +648,14 @@ and annotations are straightforward, as seen in figure \ref{graph:violin_annotat
 				yshift = {-3*height("a")}
 			},
 			ymajorgrids=true,
-		};
+		}
 		\violinplot[%
 			index=A,
 			relative position=1,
 			color=green!33!black,
 			label={Estimated bandwidth},
 			col sep=tab,
-		]{example.dat};
+		]{example.dat}
 		\violinplot[%
 			index=A,
 			bandwidth=0.1,
@@ -657,7 +663,7 @@ and annotations are straightforward, as seen in figure \ref{graph:violin_annotat
 			color=green!12!black,
 			label={Smaller bandwidth},
 			col sep=tab,
-		]{example.dat};
+		]{example.dat}
 		\begin{axis}[
 			xmin=0,xmax=6,
 			ymin=-2,ymax=5,
@@ -699,69 +705,69 @@ Figure \ref{graph:violin_annotations} is compiled from the code excerpt below.
 	rulecolor=mintedbgannot,
 	framesep=10pt,
 	bgcolor=mintedbgannot]{latex}
-	\begin{tikzpicture}
-		\violinsetoptions[
-			averages,
-			data points,
-		]{
-			xmin=0,xmax=6,
-			ymin=-2,ymax=5,
-			xlabel = {Bandwith choice},
-			ylabel = {Some property},
-			title={Problems with Different %
-				Distributions},
-			xlabel style={
-				yshift = {-3*height("a")}
-			},
-			ymajorgrids=true,
-		};
-		\violinplot[%
-			index=A,
-			relative position=1,
-			color=green!33!black,
-			label={Estimated bandwidth},
-			col sep=tab,
-		]{example.dat};
-		\violinplot[%
-			index=A,
-			bandwidth=0.1,
-			relative position=4,
-			color=green!12!black,
-			label={Smaller bandwidth},
-			col sep=tab,
-		]{example.dat};
-		\begin{axis}[
-			xmin=0,xmax=6,
-			ymin=-2,ymax=5,
-		]
-		\draw[-{Stealth}] (axis cs: 1.75,0.45) %
-		.. controls (axis cs:1.75,0.85) and %
-		(axis cs:3.9,0.5) .. (axis cs: 3.9,1.05);
-		\draw[decoration={raise=2pt,text along path,%
-		text={|\tiny| Better bandwidth}, %
-		text align={center}}, decorate] %
-		(axis cs: 1.75,0.45) %
-		.. controls (axis cs:1.75,0.85) and %
-		(axis cs:3.9,0.5) .. (axis cs: 3.9,1.05);
-		\draw[-{Stealth}] %
-		(axis cs: 1.5,0.45) .. controls %
-		(axis cs:1.5,0.85) and (axis cs:1.25,1.1) %
-		.. (axis cs: 1.25,1.5) .. controls %
-		(axis cs:1.25,1.9) and (axis cs:1.35,1.9) %
-		.. (axis cs:1.35,2.6);
-		\draw[decoration={raise=2pt,text along path, %
-		text={|\tiny|Very oversmoothed}, %
-		text align={center}}, decorate] %
-		(axis cs: 1.35,2.6) .. controls %
-		(axis cs:1.35,1.9) and (axis cs:1.25,1.9) %
-		.. (axis cs: 1.25,1.5) .. %
-		controls (axis cs:1.25,1.1) and %
-		(axis cs:1.5,0.85) .. (axis cs:1.5,0.45);
-		\end{axis}
-	\end{tikzpicture}
+\begin{tikzpicture}
+	\violinsetoptions[
+		averages,
+		data points,
+	]{
+		xmin=0,xmax=6,
+		ymin=-2,ymax=5,
+		xlabel = {Bandwith choice},
+		ylabel = {Some property},
+		title={Problems with Different %
+			Distributions},
+		xlabel style={
+			yshift = {-3*height("a")}
+		},
+		ymajorgrids=true,
+	}
+	\violinplot[%
+		index=A,
+		relative position=1,
+		color=green!33!black,
+		label={Estimated bandwidth},
+		col sep=tab,
+	]{example.dat}
+	\violinplot[%
+		index=A,
+		bandwidth=0.1,
+		relative position=4,
+		color=green!12!black,
+		label={Smaller bandwidth},
+		col sep=tab,
+	]{example.dat}
+	\begin{axis}[
+		xmin=0,xmax=6,
+		ymin=-2,ymax=5,
+	]
+	\draw[-{Stealth}] (axis cs: 1.75,0.45) %
+	.. controls (axis cs:1.75,0.85) and %
+	(axis cs:3.9,0.5) .. (axis cs: 3.9,1.05);
+	\draw[decoration={raise=2pt,text along path,%
+	text={|\tiny| Better bandwidth}, %
+	text align={center}}, decorate] %
+	(axis cs: 1.75,0.45) %
+	.. controls (axis cs:1.75,0.85) and %
+	(axis cs:3.9,0.5) .. (axis cs: 3.9,1.05);
+	\draw[-{Stealth}] %
+	(axis cs: 1.5,0.45) .. controls %
+	(axis cs:1.5,0.85) and (axis cs:1.25,1.1) %
+	.. (axis cs: 1.25,1.5) .. controls %
+	(axis cs:1.25,1.9) and (axis cs:1.35,1.9) %
+	.. (axis cs:1.35,2.6);
+	\draw[decoration={raise=2pt,text along path, %
+	text={|\tiny|Very oversmoothed}, %
+	text align={center}}, decorate] %
+	(axis cs: 1.35,2.6) .. controls %
+	(axis cs:1.35,1.9) and (axis cs:1.25,1.9) %
+	.. (axis cs: 1.25,1.5) .. %
+	controls (axis cs:1.25,1.1) and %
+	(axis cs:1.5,0.85) .. (axis cs:1.5,0.45);
+	\end{axis}
+\end{tikzpicture}
 \end{minted}
 
-\subsubsection{Standalone Kernel Density Estimation}
+\subsection{Standalone Kernel Density Estimation}
 
 Plotting only one dataset and choosing adequate plot limits, one
 may obtain a simple representation of a kernel density estimation.
@@ -781,11 +787,11 @@ code excerpt below.
 			title={Plotting Some Data},
 			ylabel={$p(x)$},
 			xlabel={$x$},
-			ymajorgrids=true,
+			xmajorgrids=true,
 			ymajorticks=true,
 			ytick={0.0,2.5,5,7.5,10},
 			yticklabels={0.0,2.5,5,7.5,10},
-		};
+		}
 		\violinplot[%
 			index=C,
 			relative position=0,
@@ -797,7 +803,7 @@ code excerpt below.
 			dataset mark=*,
 			dataset fill=red!90!black,
 			dataset fill opacity=0.2,
-		]{example.dat};
+		]{example.dat}
 	\end{tikzpicture}
 	\caption{Standalone kernel density estimation example}
 	\label{graph:kde_standalone}
@@ -811,37 +817,36 @@ code excerpt below.
 	rulecolor=mintedbgstand,
 	framesep=10pt,
 	bgcolor=mintedbgstand]{latex}
-	\begin{tikzpicture}
-		\violinsetoptions[
-			no mirror,
-			reverse axis,
-			data points,
-		]{%
-			xmin=3.3,xmax=4,
-			ymin=-1,ymax=12,
-			title={Plotting Some Data},
-			ylabel={$p(x)$},
-			xlabel={$x$},
-			ymajorgrids=true,
-			ymajorticks=true,
-			ytick={0.0,2.5,5,7.5,10},
-			yticklabels={0.0,2.5,5,7.5,10},
-		};
-		\violinplot[%
-			index=C,
-			relative position=0,
-			color=red!30!black,
-			label={},
-			col sep=tab,
-			dataset size=5pt,
-			dataset color=red!10!black,
-			dataset mark=*,
-			dataset fill=red!90!black,
-			dataset fill opacity=0.2,
-		]{example.dat};
-	\end{tikzpicture}
+\begin{tikzpicture}
+	\violinsetoptions[
+		no mirror,
+		reverse axis,
+		data points,
+	]{%
+		xmin=3.3,xmax=4,
+		ymin=-1,ymax=12,
+		title={Plotting Some Data},
+		ylabel={$p(x)$},
+		xlabel={$x$},
+		xmajorgrids=true,
+		ymajorticks=true,
+		ytick={0.0,2.5,5,7.5,10},
+		yticklabels={0.0,2.5,5,7.5,10},
+	}
+	\violinplot[%
+		index=C,
+		relative position=0,
+		color=red!30!black,
+		label={},
+		col sep=tab,
+		dataset size=5pt,
+		dataset color=red!10!black,
+		dataset mark=*,
+		dataset fill=red!90!black,
+		dataset fill opacity=0.2,
+	]{example.dat}
+\end{tikzpicture}
 \end{minted}
-
 
 \section{Limitations}
 
@@ -855,7 +860,33 @@ As each violin plot is rendered in a different \texttt{axis} environment,
 the positions of the axes' labels are not, usually, correct. One should
 set it manually. In the examples, this was accomplished setting the vertical/
 horizontal shift to twice the height of a letter, in the direction opposite
-to the appropriate axis.
+to the appropriate axis. This approach also leads to another problem: using the
+keys ``height'' or ``width'' won't rescale the plot; one might use, before and
+after the code for the figure, \texttt{\textbackslash pgfplotsset}, as shown below:
+
+\colorlet{mintedbgtempplotsset}{red!50!blue}
+\colorlet{mintedbgplotsset}{mintedbgtempplotsset!10!white}
+
+\begin{minted}[%
+	escapeinside=||,
+	frame=single,
+	rulecolor=mintedbgplotsset,
+	framesep=10pt,
+	bgcolor=mintedbgplotsset]{latex}
+\pgfplotsset{height=1.75\linewidth}
+\begin{tikzpicture}
+	\violinsetoptions[
+		|\textit{options for \texttt{tikzviolinplots}}|
+	]{
+		|\textit{\texttt{pgfplots} options}|
+	}
+	\violinplot[%
+		|\textit{options for data points}|
+	]{|\textit{filename}|}
+	|...|
+\end{tikzpicture}
+\pgfplotsset{height=0.9\linewidth}
+\end{minted}
 
 For the same reason, the options \texttt{xmin}, \texttt{ymin}, \texttt{xmax}
 and \texttt{ymax} are required; no automatic placement is performed.
