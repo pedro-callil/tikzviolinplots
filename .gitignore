@@ -7,6 +7,7 @@
 *.dpth
 *.md5
 *.auxlock
+*.pyg
 
 _minted-tikzviolinplots
 

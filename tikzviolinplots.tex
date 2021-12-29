@@ -31,6 +31,7 @@
 \usemintedstyle{gruvbox-light}
 \usepackage{amsmath}
 \usepackage{scontents}
+\usepackage{wasysym}
 \usepackage{microtype}
 \usepackage{subcaption}
 \usepackage{hyperref}
@@ -320,23 +321,26 @@ space-separated columns. The optional argument is a list of options, including:
 		opacity.
 	\item \texttt{label}: Label of the plot, positioned at the point
 		set by \texttt{relative position}.
+	\item \texttt{invert}: If \texttt{true}, plot will be drawn in opposite
+		side. Useful for comparing two parts of a data set, by plotting each
+		group side by side.
 	\item Options for average and data points:
 	\begin{itemize}
-		\item \texttt{average mark}, \texttt{points mark}: Mark used
+		\item \texttt{average mark}, \texttt{dataset mark}: Mark used
 			for averages and points of the data set (defaults
 			to ``\texttt{x}'' and ``\texttt{*}'', respectively).
-		\item \texttt{average size}, \texttt{points size}: Size
+		\item \texttt{average size}, \texttt{dataset size}: Size
 			of each mark (defaults to 3pt for averages and 1pt
 			for other points).
-		\item \texttt{average color}, \texttt{points color}: Color
+		\item \texttt{average color}, \texttt{dataset color}: Color
 			of each mark's border. Defaults to black in both
 			cases.
-		\item \texttt{average opacity}, \texttt{points opacity}:
+		\item \texttt{average opacity}, \texttt{dataset opacity}:
 			Border opacity. Defaults to 1.0 in both cases.
-		\item \texttt{average fill}, \texttt{points fill}: Color
+		\item \texttt{average fill}, \texttt{dataset fill}: Color
 			of each mark's interior. Defaults to black for the
 			points of the data set and white for the averages.
-		\item \texttt{average fill opacity}, \texttt{points fill opacity}:
+		\item \texttt{average fill opacity}, \texttt{dataset fill opacity}:
 			Opacity of the marks. Defaults to 0.5 for averages and
 			0.2 for the other points.
 	\end{itemize}
@@ -348,9 +352,9 @@ If the data sets are similar and no customizations are required, one might
 use the command \texttt{{\textbackslash}violinplotwholefile}.
 
 \begin{minted}[escapeinside=||]{latex}
-\violinplotwholefile[%
-	|\textit{<option>}=\textit{<value>}|
-]{|\textit{filename}|}
+	\violinplotwholefile[%
+		|\textit{<option>}=\textit{<value>}|
+	]{|\textit{filename}|}
 \end{minted}
 
 This command will calculate and plot all columns named. The available options
@@ -447,6 +451,7 @@ Code for figure \ref{graph:violin_verti}, using
 	frame=single,
 	rulecolor=mintedbgverti,
 	framesep=10pt,
+	tabsize=4,
 	bgcolor=mintedbgverti]{latex}
 \begin{tikzpicture}
 	\violinsetoptions[
@@ -565,6 +570,7 @@ Code for figure \ref{graph:violin_horiz}, using
 	frame=single,
 	rulecolor=mintedbghoriz,
 	framesep=10pt,
+	tabsize=4,
 	bgcolor=mintedbghoriz]{latex}
 \begin{tikzpicture}
 	\violinsetoptions[
@@ -641,7 +647,7 @@ and annotations are straightforward, as seen in figure \ref{graph:violin_annotat
 		]{
 			xmin=0,xmax=6,
 			ymin=-2,ymax=5,
-			xlabel = {Bandwith choice},
+			xlabel = {Bandwidth choice},
 			ylabel = {Some property},
 			title={Problems with Different Distributions},
 			xlabel style={
@@ -704,6 +710,7 @@ Figure \ref{graph:violin_annotations} is compiled from the code excerpt below.
 	frame=single,
 	rulecolor=mintedbgannot,
 	framesep=10pt,
+	tabsize=4,
 	bgcolor=mintedbgannot]{latex}
 \begin{tikzpicture}
 	\violinsetoptions[
@@ -712,7 +719,7 @@ Figure \ref{graph:violin_annotations} is compiled from the code excerpt below.
 	]{
 		xmin=0,xmax=6,
 		ymin=-2,ymax=5,
-		xlabel = {Bandwith choice},
+		xlabel = {Bandwidth choice},
 		ylabel = {Some property},
 		title={Problems with Different %
 			Distributions},
@@ -816,6 +823,7 @@ code excerpt below.
 	frame=single,
 	rulecolor=mintedbgstand,
 	framesep=10pt,
+	tabsize=4,
 	bgcolor=mintedbgstand]{latex}
 \begin{tikzpicture}
 	\violinsetoptions[
@@ -848,6 +856,282 @@ code excerpt below.
 \end{tikzpicture}
 \end{minted}
 
+\subsection{Asymmetrical Violin Plots --- Real World Data}
+
+Using the key \texttt{invert=true} in the options of
+\texttt{\textbackslash violinplot} one can plot two different sets of data side
+by side, in an asymmetrical violin plot. This can be seen in figure
+\ref{graph:asymmetrical}, that exhibits the male and female life expectancy at
+birth, in 2019, for several countries, segregated in the WHO regions.\footnote{
+	\url{https://www.who.int/data/gho/publications/world-health-statistics}.
+}.
+
+\colorlet{malecolor}{cyan!60!white}
+\colorlet{femalecolor}{cyan!60!black}
+
+\begin{figure}[h]
+	\centering
+	\begin{tikzpicture}
+		\violinsetoptions[
+			no mirror,
+			scaled,
+		]{%
+			xmin=0.8,xmax=13.2,
+			ymin=30,ymax=100,
+			title={Life Expectancy Per WHO Region},
+			xlabel={WHO Region},
+			ylabel={Life Expectancy in Years},
+			xlabel style={
+				yshift = {-3*width("a")}
+			},
+			ymajorgrids=true,
+		}
+		\violinplot[%
+			index=LifeExpectancyAtBirthMale,
+			relative position=2,
+			color=malecolor,
+			label={Africa},
+			col sep=comma,
+			invert=true
+		]{AFR.csv}
+		\violinplot[%
+			index=LifeExpectancyAtBirthFemale,
+			relative position=2,
+			color=femalecolor,
+			label={},
+			col sep=comma,
+		]{AFR.csv}
+		\violinplot[%
+			index=LifeExpectancyAtBirthMale,
+			relative position=4,
+			color=malecolor,
+			label={Middle-East},
+			col sep=comma,
+			invert=true
+		]{EMR.csv}
+		\violinplot[%
+			index=LifeExpectancyAtBirthFemale,
+			relative position=4,
+			color=femalecolor,
+			label={},
+			col sep=comma,
+		]{EMR.csv}
+		\violinplot[%
+			index=LifeExpectancyAtBirthMale,
+			relative position=6,
+			color=malecolor,
+			label={Pacific},
+			col sep=comma,
+			invert=true
+		]{WPR.csv}
+		\violinplot[%
+			index=LifeExpectancyAtBirthFemale,
+			relative position=6,
+			color=femalecolor,
+			label={},
+			col sep=comma,
+		]{WPR.csv};
+		\violinplot[%
+			index=LifeExpectancyAtBirthMale,
+			relative position=8,
+			color=malecolor,
+			label={SE. Asia},
+			col sep=comma,
+			invert=true
+		]{SEAR.csv}
+		\violinplot[%
+			index=LifeExpectancyAtBirthFemale,
+			relative position=8,
+			color=femalecolor,
+			label={},
+			col sep=comma,
+		]{SEAR.csv}
+		\violinplot[%
+			index=LifeExpectancyAtBirthMale,
+			relative position=10,
+			color=malecolor,
+			label={Americas},
+			col sep=comma,
+			invert=true
+		]{AMR.csv}
+		\violinplot[%
+			index=LifeExpectancyAtBirthFemale,
+			relative position=10,
+			color=femalecolor,
+			label={},
+			col sep=comma,
+		]{AMR.csv}
+		\violinplot[%
+			index=LifeExpectancyAtBirthMale,
+			relative position=12,
+			color=malecolor,
+			label={Europe},
+			col sep=comma,
+			invert=true
+		]{EUR.csv}
+		\violinplot[%
+			index=LifeExpectancyAtBirthFemale,
+			relative position=12,
+			color=femalecolor,
+			label={},
+			col sep=comma,
+		]{EUR.csv}
+		\begin{axis}[
+			xmin=0.8,xmax=13.2,
+			ymin=30,ymax=100,
+		]
+			\draw(axis cs:2,35) node[anchor=east] {\male};
+			\draw(axis cs:2,35) node[anchor=west] {\female};
+			\draw(axis cs:4,35) node[anchor=east] {\male};
+			\draw(axis cs:4,35) node[anchor=west] {\female};
+			\draw(axis cs:6,35) node[anchor=east] {\male};
+			\draw(axis cs:6,35) node[anchor=west] {\female};
+			\draw(axis cs:8,35) node[anchor=east] {\male};
+			\draw(axis cs:8,35) node[anchor=west] {\female};
+			\draw(axis cs:10,35) node[anchor=east] {\male};
+			\draw(axis cs:10,35) node[anchor=west] {\female};
+			\draw(axis cs:12,35) node[anchor=east] {\male};
+			\draw(axis cs:12,35) node[anchor=west] {\female};
+		\end{axis}
+	\end{tikzpicture}
+	\caption{Example of asymmetrical plot}
+	\label{graph:asymmetrical}
+\end{figure}
+
+The code for figure \ref{graph:asymmetrical} is avaliable below:
+
+\begin{minted}[%
+	escapeinside=||,
+	frame=single,
+	rulecolor=cyan!10!white,
+	framesep=10pt,
+	tabsize=4,
+	bgcolor=cyan!10!white]{latex}
+\begin{tikzpicture}
+	\violinsetoptions[
+		no mirror,
+		scaled,
+	]{%
+		xmin=0,xmax=14,
+		ymin=30,ymax=100,
+		title={Life Expectancy Per WHO Region},
+		xlabel={WHO Region},
+		ylabel={Life Expectancy in Years},
+		xlabel style={
+			yshift = {-3*width("a")}
+		},
+		ymajorgrids=true,
+	}
+	\violinplot[%
+		index=LifeExpectancyAtBirthMale,
+		relative position=2,
+		color=malecolor,
+		label={AFR},
+		col sep=comma,
+		invert=true
+	]{AFR.csv}
+	\violinplot[%
+		index=LifeExpectancyAtBirthFemale,
+		relative position=2,
+		color=femalecolor,
+		label={},
+		col sep=comma,
+	]{AFR.csv}
+	\violinplot[%
+		index=LifeExpectancyAtBirthMale,
+		relative position=4,
+		color=malecolor,
+		label={EMR},
+		col sep=comma,
+		invert=true
+	]{EMR.csv}
+	\violinplot[%
+		index=LifeExpectancyAtBirthFemale,
+		relative position=4,
+		color=femalecolor,
+		label={},
+		col sep=comma,
+	]{EMR.csv}
+	\violinplot[%
+		index=LifeExpectancyAtBirthMale,
+		relative position=6,
+		color=malecolor,
+		label={WPR},
+		col sep=comma,
+		invert=true
+	]{WPR.csv}
+	\violinplot[%
+		index=LifeExpectancyAtBirthFemale,
+		relative position=6,
+		color=femalecolor,
+		label={},
+		col sep=comma,
+	]{WPR.csv};
+	\violinplot[%
+		index=LifeExpectancyAtBirthMale,
+		relative position=8,
+		color=malecolor,
+		label={SEAR},
+		col sep=comma,
+		invert=true
+	]{SEAR.csv}
+	\violinplot[%
+		index=LifeExpectancyAtBirthFemale,
+		relative position=8,
+		color=femalecolor,
+		label={},
+		col sep=comma,
+	]{SEAR.csv}
+	\violinplot[%
+		index=LifeExpectancyAtBirthMale,
+		relative position=10,
+		color=malecolor,
+		label={AMR},
+		col sep=comma,
+		invert=true
+	]{AMR.csv}
+	\violinplot[%
+		index=LifeExpectancyAtBirthFemale,
+		relative position=10,
+		color=femalecolor,
+		label={},
+		col sep=comma,
+	]{AMR.csv}
+	\violinplot[%
+		index=LifeExpectancyAtBirthMale,
+		relative position=12,
+		color=malecolor,
+		label={EUR},
+		col sep=comma,
+		invert=true
+	]{EUR.csv}
+	\violinplot[%
+		index=LifeExpectancyAtBirthFemale,
+		relative position=12,
+		color=femalecolor,
+		label={},
+		col sep=comma,
+	]{EUR.csv}
+	\begin{axis}[
+		xmin=0,xmax=14,
+		ymin=30,ymax=100,
+	]
+		\draw(axis cs:2,35) node[anchor=east] {\male};
+		\draw(axis cs:2,35) node[anchor=west] {\female};
+		\draw(axis cs:4,35) node[anchor=east] {\male};
+		\draw(axis cs:4,35) node[anchor=west] {\female};
+		\draw(axis cs:6,35) node[anchor=east] {\male};
+		\draw(axis cs:6,35) node[anchor=west] {\female};
+		\draw(axis cs:8,35) node[anchor=east] {\male};
+		\draw(axis cs:8,35) node[anchor=west] {\female};
+		\draw(axis cs:10,35) node[anchor=east] {\male};
+		\draw(axis cs:10,35) node[anchor=west] {\female};
+		\draw(axis cs:12,35) node[anchor=east] {\male};
+		\draw(axis cs:12,35) node[anchor=west] {\female};
+	\end{axis}
+\end{tikzpicture}
+\end{minted}
+
 \section{Limitations}
 
 As the math is handled through \TeX, generating the kernel distribution
@@ -858,11 +1142,12 @@ and the tick labels manually corrected.
 
 As each violin plot is rendered in a different \texttt{axis} environment,
 the positions of the axes' labels are not, usually, correct. One should
-set it manually. In the examples, this was accomplished setting the vertical/
-horizontal shift to twice the height of a letter, in the direction opposite
-to the appropriate axis. This approach also leads to another problem: using the
-keys ``height'' or ``width'' won't rescale the plot; one might use, before and
-after the code for the figure, \texttt{\textbackslash pgfplotsset}, as shown below:
+set it manually. In the examples, this was accomplished setting the
+vertical/horizontal shift to twice the height of a letter, in the direction
+opposite to the appropriate axis. This approach also leads to another problem:
+using the keys ``height'' or ``width'' won't rescale the plot; one might use,
+before and after the code for the figure, \texttt{\textbackslash pgfplotsset},
+as shown below:
 
 \colorlet{mintedbgtempplotsset}{red!50!blue}
 \colorlet{mintedbgplotsset}{mintedbgtempplotsset!10!white}
@@ -872,6 +1157,7 @@ after the code for the figure, \texttt{\textbackslash pgfplotsset}, as shown bel
 	frame=single,
 	rulecolor=mintedbgplotsset,
 	framesep=10pt,
+	tabsize=4,
 	bgcolor=mintedbgplotsset]{latex}
 \pgfplotsset{height=1.75\linewidth}
 \begin{tikzpicture}

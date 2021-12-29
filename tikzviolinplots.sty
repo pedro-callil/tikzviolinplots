@@ -40,6 +40,7 @@
 		relative position=0
 		color=black,
 		label={LABEL},
+		invert={FALSE},
 		average mark=x,
 		average size=3pt,
 		average color=black,
@@ -61,6 +62,7 @@
 	relative position/.estore in = \violin@delta,
 	color/.estore in = \violin@color,
 	label/.estore in = \violin@label,
+	invert/.estore in = \violin@invert,
 	average mark/.estore in = \violin@avg@mark,
 	average size/.estore in = \violin@avg@size,
 	average color/.estore in = \violin@avg@color,
@@ -467,7 +469,16 @@
 				\pgfkeyslet{/pgfplots/table/create col/next content}\entry
 			}
 		]{kdecolinv}\violin@kde
-	}{}
+	}{
+		\ifthenelse{
+			\equal{\violin@invert}{true}
+		}{
+			\pgfplotstablemodifyeachcolumnelement{kdecol}\of\violin@kde\as\cell{%
+				\pgfmathparse{-\cell+2*\violin@delta}
+				\let\cell\pgfmathresult
+			}
+		}{}
+	}
 
 	\ifthenelse{
 		\equal{\violin@reverseaxis}{true}
