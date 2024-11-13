@@ -53,6 +53,7 @@
 		dataset opacity=1.0,
 		dataset fill=black,
 		dataset fill opacity=0.2,
+		dataset jitter=0.0
 	},
 	col sep/.estore in = \violin@colsep,
 	kernel/.estore in = \violin@kernel,
@@ -75,6 +76,7 @@
 	dataset opacity/.estore in = \violin@pts@opacity,
 	dataset fill/.estore in = \violin@pts@fillcolor,
 	dataset fill opacity/.estore in = \violin@pts@fillopacity,
+	dataset jitter/.estore in = \violin@pts@jitter,
 	/violinplotwholefile/.is family, /violinplotwholefile,
 	default/.style = {
 		col sep=comma,
@@ -97,6 +99,7 @@
 		dataset opacity=1.0,
 		dataset fill=black,
 		dataset fill opacity=0.2,
+		dataset jitter=0.0,
 		spacing=1.0,
 		indexes={A,B,C},
 		primary color=blue,
@@ -123,6 +126,7 @@
 	dataset opacity/.estore in = \violin@batch@pts@opacity,
 	dataset fill/.estore in = \violin@batch@pts@fillcolor,
 	dataset fill opacity/.estore in = \violin@batch@pts@fillopacity,
+	dataset jitter/.estore in = \violin@batch@pts@jitter,
 	spacing/.estore in = \violin@batch@delta,
 	indexes/.estore in = \violin@batch@indexes,
 	primary color/.estore in = \violin@batch@color@primary,
@@ -599,6 +603,7 @@
 				opacity=\violin@pts@opacity,
 				fill=\violin@pts@fillcolor,
 				fill opacity=\violin@pts@fillopacity,
+				\violin@axis@x\space filter/.expression={\violin@axis@x + \violin@pts@jitter * rand}
 			] table [
 				\violin@axis@x=deltacol,
 				\violin@axis@y=\violin@index,
@@ -676,6 +681,7 @@
 			dataset opacity = \violin@batch@pts@opacity,
 			dataset fill = \violin@batch@pts@fillcolor,
 			dataset fill opacity = \violin@batch@pts@fillopacity,
+			dataset jitter = \violin@batch@pts@jitter
 		]{\violin@batch@filename}
 
 		\pgfmathparse{int(\violin@batch@counter+1)}
