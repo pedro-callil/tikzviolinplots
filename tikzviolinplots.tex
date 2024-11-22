@@ -254,7 +254,7 @@ elements is shown, as in figure \ref{graph:violin_horiz}.
 The plots are mirrored by default; however, passing the option \texttt{no mirror}
 will show only half the plot, as shown in figure \ref{graph:violin_horiz}.
 
-Finally, to ``transpose'' the plots (\textit{i.e.} show the distributions
+Finally, to ``transpose'' the plots (\textit{i.e.}, show the distributions
 as functions of the abcissa, as in figure \ref{graph:violin_horiz},
 and not as functions of ordinate, as in figure \ref{graph:violin_verti}),
 one might use the option \texttt{reverse axis}.
@@ -264,7 +264,7 @@ one might use the option \texttt{reverse axis}.
 The minima and maxima of the plot axes must be set in the second (and first
 mandatory) argument to the command, and should follow \texttt{pgfplots}
 syntax. For instance, to set the minimum and maximum of the $x$-axis
-to -3 and 6, and of the $y$-axis to 2.5 and 7, one might use:
+to $-3$ and 6, and of the $y$-axis to $2.5$ and 7, one might use:
 
 \begin{minted}[escapeinside=||]{latex}
 	\violinsetoptions[|\textit{<package-specific options>}|]%
@@ -289,7 +289,7 @@ This command takes one mandatory argument, and a list of options:
 \end{minted}
 
 The filename (mandatory argument) must be a path to a file storing the data as
-space-separated columns. The optional argument is a list of options, including:
+comma-separated columns. The optional argument is a list of options, including:
 
 \begin{itemize}
 	\item \texttt{col sep}: Column separation character in filename.
@@ -343,6 +343,8 @@ space-separated columns. The optional argument is a list of options, including:
 		\item \texttt{average fill opacity}, \texttt{dataset fill opacity}:
 			Opacity of the marks. Defaults to 0.5 for averages and
 			0.2 for the other points.
+		\item \texttt{dataset jitter}:
+			Amount by which to randomly jitter the marks. May help with distinguishing overlapping points. Defaults to $0.0$ (\textit{i.e.}, no jitter).
 	\end{itemize}
 \end{itemize}
 
@@ -471,9 +473,9 @@ Code for figure \ref{graph:violin_verti}, using
 	\violinplotwholefile[%
 		primary color=orange,
 		secondary color=black,
-		batch indexes={C,B,A,D,E},
-		batch spacing=1.0,
-		batch labels={%
+		indexes={C,B,A,D,E},
+		spacing=1.0,
+		labels={%
 			$\alpha$,
 			$\beta$,
 			$\gamma$,
@@ -861,7 +863,7 @@ code excerpt below.
 Using the key \texttt{invert=true} in the options of
 \texttt{\textbackslash violinplot} one can plot two different sets of data side
 by side, in an asymmetrical violin plot. This can be seen in figure
-\ref{graph:asymmetrical}, that exhibits the male and female life expectancy at
+\ref{graph:asymmetrical}, which exhibits the male and female life expectancy at
 birth, in 2019, for several countries, segregated in the WHO regions.\footnote{
 	\url{https://www.who.int/data/gho/publications/world-health-statistics}.
 }.
@@ -998,7 +1000,7 @@ birth, in 2019, for several countries, segregated in the WHO regions.\footnote{
 	\label{graph:asymmetrical}
 \end{figure}
 
-The code for figure \ref{graph:asymmetrical} is avaliable below:
+The code for figure \ref{graph:asymmetrical} is available below:
 
 \begin{minted}[%
 	escapeinside=||,
