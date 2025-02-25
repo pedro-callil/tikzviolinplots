@@ -9,7 +9,7 @@
 *.auxlock
 *.pyg
 
-_minted-tikzviolinplots
+_minted
 
 *.dat
 

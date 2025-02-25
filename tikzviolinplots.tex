@@ -1,5 +1,5 @@
 %% tikzviolinplots.tex
-%% Copyright 2023 Pedro Callil-Soares
+%% Copyright 2025 Pedro Callil-Soares
 %
 % This work may be distributed and/or modified under the
 % conditions of the LaTeX Project Public License, either version 1.3
@@ -663,6 +663,7 @@ and annotations are straightforward, as seen in figure \ref{graph:violin_annotat
 			color=green!33!black,
 			label={Estimated bandwidth},
 			col sep=tab,
+			dataset jitter=0.2,
 		]{example.dat}
 		\violinplot[%
 			index=A,
@@ -671,6 +672,7 @@ and annotations are straightforward, as seen in figure \ref{graph:violin_annotat
 			color=green!12!black,
 			label={Smaller bandwidth},
 			col sep=tab,
+			dataset jitter=0.6,
 		]{example.dat}
 		\begin{axis}[
 			xmin=0,xmax=6,
@@ -736,6 +738,7 @@ Figure \ref{graph:violin_annotations} is compiled from the code excerpt below.
 		color=green!33!black,
 		label={Estimated bandwidth},
 		col sep=tab,
+		dataset jitter=0.2,
 	]{example.dat}
 	\violinplot[%
 		index=A,
@@ -744,6 +747,7 @@ Figure \ref{graph:violin_annotations} is compiled from the code excerpt below.
 		color=green!12!black,
 		label={Smaller bandwidth},
 		col sep=tab,
+		dataset jitter=0.6,
 	]{example.dat}
 	\begin{axis}[
 		xmin=0,xmax=6,
@@ -1178,5 +1182,9 @@ as shown below:
 
 For the same reason, the options \texttt{xmin}, \texttt{ymin}, \texttt{xmax}
 and \texttt{ymax} are required; no automatic placement is performed.
+
+\section{Acknowledgements}
+
+The author thanks Falko Galperin for the implementation of the jitter option.
 
 \end{document}
