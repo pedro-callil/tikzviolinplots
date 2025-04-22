@@ -36,6 +36,7 @@
 		kernel=gaussian,
 		bandwidth=NONE,
 		index=DATA,
+		frequencies=FREQINTERNALVIOLIN,
 		samples=50,
 		relative position=0
 		color=black,
@@ -59,6 +60,7 @@
 	kernel/.estore in = \violin@kernel,
 	bandwidth/.estore in = \violin@bandwidth,
 	index/.estore in = \violin@index,
+	frequencies/.estore in = \violin@frequencies,
 	samples/.estore in = \violin@samples,
 	relative position/.estore in = \violin@delta,
 	color/.estore in = \violin@color,
@@ -248,11 +250,29 @@
 	\pgfmathparse{0}
 	\let\violin@dataset@stddev\pgfmathresult
 	\let\violin@dataset@average\pgfmathresult
+	\let\violin@dataset@weightsum\pgfmathresult
+	\let\violin@weight@row\pgfmathresult
 
+	% Calculating averages
 	\pgfplotstableforeachcolumnelement{\violin@index}\of\theviolin@dataset@table\as\xi{%
-		\pgfmathparse{\violin@dataset@average+(\xi/(1+\violin@filename@lastindex))}
+		\ifthenelse{
+			\equal{\violin@frequencies}{FREQINTERNALVIOLIN}
+		}{
+			\pgfmathparse{1}
+			\let\violin@dataset@weight\pgfmathresult
+		}{
+			\pgfplotstablegetelem{\violin@weight@row}{\violin@frequencies}\of{\theviolin@dataset@table}
+			\let\violin@dataset@weight\pgfplotsretval
+			\pgfmathparse{\violin@weight@row+1}
+			\let\violin@weight@row\pgfmathresult
+		}
+		\pgfmathparse{\violin@dataset@weightsum+\violin@dataset@weight}
+		\let\violin@dataset@weightsum\pgfmathresult
+		\pgfmathparse{\violin@dataset@average+\xi*\violin@dataset@weight}
 		\let\violin@dataset@average\pgfmathresult
 	}
+	\pgfmathparse{\violin@dataset@average/\violin@dataset@weightsum}
+	\let\violin@dataset@average\pgfmathresult
 
 	\ifthenelse{
 		\equal{\violin@datapoints}{true}
@@ -275,20 +295,36 @@
 		\def\violin@axis@y{y}
 	}
 
+	% Bandwidth calculation
 	\ifthenelse{%
 		\equal{\violin@bandwidth}{NONE}%
 	}{%
+		\pgfmathparse{0}
+		\let\violin@weight@row\pgfmathresult
+		% Standard deviation calculation
 		\pgfplotstableforeachcolumnelement{\violin@index}\of\theviolin@dataset@table\as\xi{%
-			\pgfmathparse{\violin@dataset@stddev+(\xi-\violin@dataset@average)^2}
+			\ifthenelse{
+				\equal{\violin@frequencies}{FREQINTERNALVIOLIN}
+			}{
+				\pgfmathparse{1}
+				\let\violin@dataset@weight\pgfmathresult
+			}{
+				\pgfplotstablegetelem{\violin@weight@row}{\violin@frequencies}\of{\theviolin@dataset@table}
+				\let\violin@dataset@weight\pgfplotsretval
+				\pgfmathparse{\violin@weight@row+1}
+				\let\violin@weight@row\pgfmathresult
+			}
+			\pgfmathparse{\violin@dataset@stddev+\violin@weight@row*(\xi-\violin@dataset@average)^2}
 			\let\violin@dataset@stddev\pgfmathresult
 		}
-		\pgfmathparse{sqrt(\violin@dataset@stddev/(1+\violin@filename@lastindex))}
+		\pgfmathparse{sqrt(\violin@dataset@stddev/\violin@dataset@weightsum)}
 		\let\violin@dataset@stddev\pgfmathresult
-		\pgfmathparse{1.06*\violin@dataset@stddev*((1+\violin@filename@lastindex)^(-0.2))}%
+		\pgfmathparse{1.06*\violin@dataset@stddev*(\violin@dataset@weightsum^(-0.2))}%
 		\let\violin@bandwidth\pgfmathresult
 	}{%
 	}
 
+	% Setting limits for curve
 	\pgfplotstablegetelem{0}{\violin@index}\of{\theviolin@dataset@table}
 	\let\violin@dataset@min\pgfplotsretval
 	\let\violin@dataset@max\pgfplotsretval
@@ -320,6 +356,7 @@
 	\pgfmathparse{\violin@dataset@max + 3*\violin@bandwidth}
 	\let\violin@dataset@max\pgfmathresult
 
+	% Creating curve domain
 	\pgfplotstableset{
 		create on use/list/.style={create col/expr={
 			\violin@dataset@min + (\violin@dataset@max-\violin@dataset@min)
@@ -328,6 +365,7 @@
 	}
 
 
+	% Calculating KDE
 	\pgfplotstablenew[columns={list}]{\violin@samples}\violin@kde
 
 	\pgfmathparse{0.0}
@@ -335,15 +373,25 @@
 
 	\pgfplotstablecreatecol[
 		create col/assign/.code={
-			\pgfmathparse{\violin@filename@lastindex+1}
-			\let\violin@filename@lastindex\pgfmathresult
 			\pgfmathparse{%
-				1.0/(\violin@filename@lastindex*\violin@bandwidth)
+				1.0/(\violin@dataset@weightsum*\violin@bandwidth)
 			}
 			\let\violin@kde@factor\pgfmathresult
 			\pgfmathparse{0}
 			\let\violin@kde@accum\pgfmathresult
+			\let\violin@weight@row\pgfmathresult
 			\pgfplotstableforeachcolumnelement{\violin@index}\of\theviolin@dataset@table\as\xi{%
+				\ifthenelse{
+					\equal{\violin@frequencies}{FREQINTERNALVIOLIN}
+				}{
+					\pgfmathparse{1}
+					\let\violin@dataset@weight\pgfmathresult
+				}{
+					\pgfplotstablegetelem{\violin@weight@row}{\violin@frequencies}\of{\theviolin@dataset@table}
+					\let\violin@dataset@weight\pgfplotsretval
+					\pgfmathparse{\violin@weight@row+1}
+					\let\violin@weight@row\pgfmathresult
+				}
 				\pgfmathparse{%
 					((\xi-\thisrow{list})/%
 					\violin@bandwidth)}
@@ -352,14 +400,14 @@
 					\equal{\violin@kernel}{gaussian}
 				}{
 					\pgfmathparse{\violin@kde@accum + %
-						e^(-0.5*\violin@u*\violin@u)/sqrt(2*pi)}
+						\violin@dataset@weight*e^(-0.5*\violin@u*\violin@u)/sqrt(2*pi)}
 					\let\violin@kde@accum\pgfmathresult
 				}{}
 				\ifthenelse{
 					\equal{\violin@kernel}{logistic}
 				}{
 					\pgfmathparse{\violin@kde@accum + %
-						1/(e^\violin@u + 2 + e^(-\violin@u))
+						\violin@dataset@weight*1/(e^\violin@u + 2 + e^(-\violin@u))
 					}
 					\let\violin@kde@accum\pgfmathresult
 				}{}
@@ -373,7 +421,7 @@
 						\equal{\pgfmathresult}{0}
 					}{
 						\pgfmathparse{\violin@kde@accum + %
-							0.75*(1-\violin@u*\violin@u)
+							\violin@dataset@weight*0.75*(1-\violin@u*\violin@u)
 						}
 					}{
 						\pgfmathparse{\violin@kde@accum}
@@ -389,7 +437,7 @@
 					\ifthenelse{
 						\equal{\pgfmathresult}{0}
 					}{
-						\pgfmathparse{\violin@kde@accum + 0.5}
+						\pgfmathparse{\violin@kde@accum + \violin@dataset@weight*0.5}
 					}{
 						\pgfmathparse{\violin@kde@accum}
 					}
@@ -405,7 +453,7 @@
 						\equal{\pgfmathresult}{0}
 					}{
 						\pgfmathparse{\violin@kde@accum + %
-							1-abs(\violin@u)}
+							\violin@dataset@weight*(1-abs(\violin@u))}
 					}{
 						\pgfmathparse{\violin@kde@accum}
 					}
