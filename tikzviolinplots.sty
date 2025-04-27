@@ -17,7 +17,7 @@
 % tikzviolinplots.tex.
 
 \NeedsTeXFormat{LaTeX2e}[1994/06/01]
-\ProvidesPackage{tikzviolinplots}[2025/04/21 v0.9.0 Violin plot creation in pgfplots]
+\ProvidesPackage{tikzviolinplots}[2025/04/27 v0.9.1 Violin plot creation in pgfplots]
 
 \RequirePackage{pgfplots}
 \RequirePackage{pgfplotstable}
@@ -314,7 +314,7 @@
 				\pgfmathparse{\violin@weight@row+1}
 				\let\violin@weight@row\pgfmathresult
 			}
-			\pgfmathparse{\violin@dataset@stddev+\violin@weight@row*(\xi-\violin@dataset@average)^2}
+			\pgfmathparse{\violin@dataset@stddev+\violin@dataset@weight*(\xi-\violin@dataset@average)^2}
 			\let\violin@dataset@stddev\pgfmathresult
 		}
 		\pgfmathparse{sqrt(\violin@dataset@stddev/\violin@dataset@weightsum)}
@@ -697,8 +697,14 @@
 	\let\violin@batch@relativepos\pgfmathresult
 
 	\@for\violin@batch@index:=\violin@batch@indexes\do{
-		\pgfmathparse{int(\violin@batch@counter*%
-			(100/(\violin@batch@numofplots-1)))}
+		\ifthenelse{%
+			\equal{1}{\violin@batch@numofplots}
+		}{%
+			\pgfmathparse{50}
+		}{%
+			\pgfmathparse{int(\violin@batch@counter*%
+				(100/(\violin@batch@numofplots-1)))}
+		}
 		\let\violin@batch@color@deg\pgfmathresult
 		\edef\violin@batch@color{\violin@batch@color@primary!\violin@batch@color@deg!\violin@batch@color@secondary}
 
