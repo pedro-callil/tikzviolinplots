@@ -323,6 +323,10 @@ comma-separated columns. The optional argument is a list of options, including:
 		opacity.
 	\item \texttt{label}: Label of the plot, positioned at the point
 		set by \texttt{relative position}.
+	\item \texttt{data label style}: style options for the data label (that
+		is, \texttt{xticklabel style} if package-specific option
+		\texttt{reverse axis} is not set, or \texttt{yticklabel style}
+		otherwise).
 	\item \texttt{invert}: If \texttt{true}, plot will be drawn in opposite
 		side. Useful for comparing two parts of a data set, by plotting each
 		group side by side.
@@ -418,7 +422,7 @@ figure \ref{graph:violin_verti}.
 			xlabel={Groups},
 			ylabel={Some property},
 			xlabel style={
-				yshift = {-2*height("a")}
+				yshift = {-3*height("a")}
 			},
 			ymajorgrids=true,
 		}
@@ -439,6 +443,7 @@ figure \ref{graph:violin_verti}.
 			dataset mark=diamond*,
 			dataset fill=blue!50!white,
 			dataset fill opacity=1.0,
+			data label style={rotate=-45},
 		]{example.dat}
 	\end{tikzpicture}
 	\caption{Violin plot --- vertical example}
@@ -468,7 +473,7 @@ Code for figure \ref{graph:violin_verti}, using
 		xlabel={Groups},
 		ylabel={Some property},
 		xlabel style={
-			yshift = {-2*height("a")}
+			yshift = {-3*height("a")}
 		},
 		ymajorgrids=true,
 	}
@@ -489,6 +494,7 @@ Code for figure \ref{graph:violin_verti}, using
 		dataset mark=diamond*,
 		dataset fill=blue!50!white,
 		dataset fill opacity=1.0,
+		data label style={rotate=-45},
 	]{example.dat}
 \end{tikzpicture}
 

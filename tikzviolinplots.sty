@@ -17,7 +17,7 @@
 % tikzviolinplots.tex.
 
 \NeedsTeXFormat{LaTeX2e}[1994/06/01]
-\ProvidesPackage{tikzviolinplots}[2025/04/27 v0.9.1 Violin plot creation in pgfplots]
+\ProvidesPackage{tikzviolinplots}[2025/09/29 v0.10.0 Violin plot creation in pgfplots]
 
 \RequirePackage{pgfplots}
 \RequirePackage{pgfplotstable}
@@ -41,6 +41,7 @@
 		relative position=0
 		color=black,
 		label={LABEL},
+		data label style={},
 		invert={FALSE},
 		average mark=x,
 		average size=3pt,
@@ -54,7 +55,7 @@
 		dataset opacity=1.0,
 		dataset fill=black,
 		dataset fill opacity=0.2,
-		dataset jitter=0.0
+		dataset jitter=0.0,
 	},
 	col sep/.estore in = \violin@colsep,
 	kernel/.estore in = \violin@kernel,
@@ -65,6 +66,7 @@
 	relative position/.estore in = \violin@delta,
 	color/.estore in = \violin@color,
 	label/.estore in = \violin@label,
+	data label style/.estore in = \violin@datalabelstyle,
 	invert/.estore in = \violin@invert,
 	average mark/.estore in = \violin@avg@mark,
 	average size/.estore in = \violin@avg@size,
@@ -107,6 +109,7 @@
 		primary color=blue,
 		secondary color=black,
 		labels={A,B,C},
+		data label style={},
 	},
 	col sep/.estore in = \violin@batch@colsep,
 	kernel/.estore in = \violin@batch@kernel,
@@ -134,6 +137,7 @@
 	primary color/.estore in = \violin@batch@color@primary,
 	secondary color/.estore in = \violin@batch@color@secondary,
 	labels/.estore in = \violin@batch@labels,
+	data label style/.estore in = \violin@batch@datalabelstyle,
 }
 
 \newcommand{\violinsetoptions}[2][]{%
@@ -555,6 +559,8 @@
 		axis on top,
 		axis line style={draw=none},
 		tick style={draw=none},
+		xticklabel style={\violin@datalabelstyle},
+		yticklabel style={\violin@datalabelstyle},
 	]
 		\addplot[
 			no marks,
@@ -723,6 +729,7 @@
 			samples = \violin@batch@samples,
 			color=\violin@batch@color,
 			label={\violin@batch@label},
+			data label style={\violin@batch@datalabelstyle},
 			average mark = \violin@batch@avg@mark,
 			average size = \violin@batch@avg@size,
 			average color = \violin@batch@avg@color,
