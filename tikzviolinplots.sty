@@ -153,7 +153,14 @@
 }
 
 \newcommand{\violinsetoptions}[2][]{%
-	\pgfkeys{/violinplot, #1}
+	\pgfkeys@spdef\violin@args{#1}
+	\edef\violin@args{
+		/handler config=only existing,
+		/violinplot,
+		\expandonce{\violin@args},
+		/handler config=all,
+	}
+	\pgfkeysalsofrom{\violin@args}
 	\def\violin@axisoptions{#2}
 
 	\ifviolin@reverseaxis
