@@ -643,20 +643,16 @@
 	\pgfkeys{/violinplot, #1}
 
 	\ifviolin@reverseaxis
-		\pgfkeys{
-			/pgfplots/xticklabels={,,},
-			/pgfplots/yticklabels/.expand once={\violin@label},
-			/pgfplots/ytick/.expand once={\violin@delta},
-			/pgfplots/yticklabel style={\violin@datalabelstyle},
-			/pgfplots/xmajorticks=false,
+		\pgfplotsset{
+			yticklabels/.expand once={\violin@label},
+			ytick/.expand once={\violin@delta},
+			yticklabel style={\violin@datalabelstyle},
 		}
 	\else
-		\pgfkeys{
-			/pgfplots/yticklabels={,,},
-			/pgfplots/xticklabels/.expand once={\violin@label},
-			/pgfplots/xtick/.expand once={\violin@delta},
-			/pgfplots/xticklabel style={\violin@datalabelstyle},
-			/pgfplots/ymajorticks=false,
+		\pgfplotsset{
+			xticklabels/.expand once={\violin@label},
+			xtick/.expand once={\violin@delta},
+			xticklabel style={\violin@datalabelstyle},
 		}
 	\fi
 
@@ -695,20 +691,16 @@
 	\let\violin@batch@stop\pgfmathresult
 
 	\ifviolin@reverseaxis
-		\pgfkeys{
-			/pgfplots/xticklabels={,,},
-			/pgfplots/yticklabels/.expand once={\violin@batch@labels},
-			/pgfplots/ytick/.expand once={\violin@batch@start, \violin@batch@step, ..., \violin@batch@stop},
-			/pgfplots/yticklabel style={\violin@batch@datalabelstyle},
-			/pgfplots/xmajorticks=false,
+		\pgfplotsset{
+			yticklabels/.expand once={\violin@batch@labels},
+			ytick/.expand once={\violin@batch@start, \violin@batch@step, ..., \violin@batch@stop},
+			yticklabel style={\violin@batch@datalabelstyle},
 		}
 	\else
-		\pgfkeys{
-			/pgfplots/yticklabels={,,},
-			/pgfplots/xticklabels/.expand once={\violin@batch@labels},
-			/pgfplots/xtick/.expand once={\violin@batch@start, \violin@batch@step, ..., \violin@batch@stop},
-			/pgfplots/xticklabel style={\violin@batch@datalabelstyle},
-			/pgfplots/ymajorticks=false,
+		\pgfplotsset{
+			xticklabels/.expand once={\violin@batch@labels},
+			xtick/.expand once={\violin@batch@start, \violin@batch@step, ..., \violin@batch@stop},
+			xticklabel style={\violin@batch@datalabelstyle},
 		}
 	\fi
 
