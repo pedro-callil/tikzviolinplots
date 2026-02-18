@@ -508,51 +508,67 @@
 		\pgfplotstablevertcat{\violin@kdewithmirror}{\violin@kdemirror}
 	\fi
 
-		\ifviolin@nomirror
-			\ifviolin@reverseaxis
-				\addplot[
+	\ifviolin@nomirror
+		\ifviolin@reverseaxis
+			\edef\violin@addplot{
+				\noexpand\addplot[
 					no marks,
 					fill=\violin@color,
 					opacity=0.50,
 				] table [
 					\violin@axis@x=kdecol, \violin@axis@y=list
-				] {\violin@kde};
-				\addplot[
+				] {\noexpand\violin@kde};
+			}
+			\violin@addplot
+			\edef\violin@addplot{
+				\noexpand\addplot[
 					no marks,
 					color=black,
 				] coordinates {
 					(\pgfkeysvalueof{/pgfplots/xmin},\violin@delta)%
 					(\pgfkeysvalueof{/pgfplots/xmax},\violin@delta)
 				};
-			\else
-				\addplot[
+			}
+			\violin@addplot
+		\else
+			\edef\violin@addplot{
+				\noexpand\addplot[
 					no marks,
 					fill=\violin@color,
 					opacity=0.50,
 				] table [
 					\violin@axis@x=kdecol, \violin@axis@y=list
-				] {\violin@kde};
-				\addplot[
+				] {\noexpand\violin@kde};
+			}
+			\violin@addplot
+			\edef\violin@addplot{
+				\noexpand\addplot[
 					no marks,
 					color=black,
 				] coordinates {
 					(\violin@delta,\pgfkeysvalueof{/pgfplots/ymin})%
 					(\violin@delta,\pgfkeysvalueof{/pgfplots/ymax})
 				};
-			\fi
-		\else
-			\addplot[
+			}
+			\violin@addplot
+		\fi
+	\else
+		\edef\violin@addplot{
+			\noexpand\addplot[
 				no marks,
 				fill=\violin@color,
 				opacity=0.50,
 			] table [
 				\violin@axis@x=kdecol, \violin@axis@y=list
-			] {\violin@kdewithmirror};
-		\fi
+			] {\noexpand\violin@kdewithmirror};
+		}
+		\violin@addplot
+	\fi
 
-		\ifviolin@averages
-			\ifviolin@reverseaxis
-				\addplot[
+	\ifviolin@averages
+		\ifviolin@reverseaxis
+			\edef\violin@addplot{
+				\noexpand\addplot[
 					only marks,
 					mark=\violin@avg@mark,
 					mark size=\violin@avg@size,
@@ -563,8 +579,11 @@
 				] coordinates {
 					(\violin@dataset@average,\violin@delta)
 				};
-			\else
-				\addplot[
+			}
+			\violin@addplot
+		\else
+			\edef\violin@addplot{
+				\noexpand\addplot[
 					only marks,
 					mark=\violin@avg@mark,
 					mark size=\violin@avg@size,
@@ -575,11 +594,14 @@
 				] coordinates {
 					(\violin@delta,\violin@dataset@average)
 				};
-			\fi
+			}
+			\violin@addplot
 		\fi
+	\fi
 
-		\ifviolin@datapoints
-			\addplot[
+	\ifviolin@datapoints
+		\edef\violin@addplot{
+			\noexpand\addplot[
 				only marks,
 				mark=\violin@pts@mark,
 				mark size=\violin@pts@size,
@@ -591,8 +613,10 @@
 			] table [
 				\violin@axis@x=deltacol,
 				\violin@axis@y=\violin@index,
-			] {\theviolin@dataset@table};
-		\fi
+			] {\noexpand\theviolin@dataset@table};
+		}
+		\violin@addplot
+	\fi
 }
 
 \newcommand{\violin@getnth}[2]{%
