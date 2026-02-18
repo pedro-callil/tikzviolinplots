@@ -22,7 +22,6 @@
 \RequirePackage{pgfplots}
 \RequirePackage{pgfplotstable}
 \RequirePackage{ifthen}
-\RequirePackage{stringstrings}
 \RequirePackage{pgfkeys}
 
 
@@ -37,7 +36,9 @@
 \newif\ifviolin@invert
 
 \pgfkeys{
-	/violinplot/.is family, /violinplot,
+	/violinplot/.is family,
+	/violinplot/.search also=/pgfplots,
+	/violinplot,
 	scaled/.is if=violin@scaled,
 	data points/.is if=violin@datapoints,
 	averages/.is if=violin@averages,
@@ -153,52 +154,16 @@
 }
 
 \newcommand{\violinsetoptions}[2][]{%
-	\pgfkeys@spdef\violin@args{#1}
+	\pgfkeys@spdef\violin@violinargs{#1}
+	\pgfkeys@spdef\violin@pgfplotsargs{#2}
 	\edef\violin@args{
 		/handler config=only existing,
 		/violinplot,
-		\expandonce{\violin@args},
+		\expandonce{\violin@violinargs},
+		\expandonce{\violin@pgfplotsargs},
 		/handler config=all,
 	}
 	\pgfkeysalsofrom{\violin@args}
-	\def\violin@axisoptions{#2}
-
-	\@for\kdeoption:=\violin@axisoptions\do{
-		\noblanks[e]{\kdeoption}
-		\let\violin@opt\thestring
-		\whereisword[q]{\violin@opt}{xmin}
-		\ifthenelse{
-			\equal{\theresult}{0}
-		}{}{
-			\let\violin@axis@xmin\kdeoption
-		}
-		\whereisword[q]{\violin@opt}{xmax}
-		\ifthenelse{
-			\equal{\theresult}{0}
-		}{}{
-			\let\violin@axis@xmax\kdeoption
-		}
-		\whereisword[q]{\violin@opt}{ymin}
-		\ifthenelse{
-			\equal{\theresult}{0}
-		}{}{
-			\let\violin@axis@ymin\kdeoption
-		}
-		\whereisword[q]{\violin@opt}{ymax}
-		\ifthenelse{
-			\equal{\theresult}{0}
-		}{}{
-			\let\violin@axis@ymax\kdeoption
-		}
-	}
-
-	\def\violin@axislimits{
-		\violin@axis@xmin,\violin@axis@xmax,
-		\violin@axis@ymin,\violin@axis@ymax,
-	}
-
-	\let\violin@axisoptions\violin@axislimits
-
 }
 
 \newcommand{\addviolinplot}[2][]{%
