@@ -29,8 +29,21 @@
 \DeclareOption*{\PackageWarning{tikzviolinplots}{Unknown option: ‘\CurrentOption’}}
 \ProcessOptions\relax
 
+\newif\ifviolin@scaled
+\newif\ifviolin@datapoints
+\newif\ifviolin@averages
+\newif\ifviolin@nomirror
+\newif\ifviolin@reverseaxis
+\newif\ifviolin@invert
+
 \pgfkeys{
 	/violinplot/.is family, /violinplot,
+	scaled/.is if=violin@scaled,
+	data points/.is if=violin@datapoints,
+	averages/.is if=violin@averages,
+	no mirror/.is if=violin@nomirror,
+	reverse axis/.is if=violin@reverseaxis,
+	invert/.is if=violin@invert,
 	default/.style = {
 		col sep=comma,
 		kernel=gaussian,
@@ -42,7 +55,7 @@
 		color=black,
 		label={LABEL},
 		data label style={},
-		invert={FALSE},
+		invert=false,
 		average mark=x,
 		average size=3pt,
 		average color=black,
@@ -67,7 +80,6 @@
 	color/.estore in = \violin@color,
 	label/.estore in = \violin@label,
 	data label style/.estore in = \violin@datalabelstyle,
-	invert/.estore in = \violin@invert,
 	average mark/.estore in = \violin@avg@mark,
 	average size/.estore in = \violin@avg@size,
 	average color/.estore in = \violin@avg@color,
@@ -141,46 +153,10 @@
 }
 
 \newcommand{\violinsetoptions}[2][]{%
-
-	\def\violin@scaled{false}
-	\def\violin@datapoints{false}
-	\def\violin@averages{false}
-	\def\violin@nomirror{false}
-	\def\violin@reverseaxis{false}
+	\pgfkeys{/violinplot, #1}
 	\def\violin@axisoptions{#2}
 
-	\@for\kdeoption:=#1\do{
-		\noblanks[q]{\kdeoption}
-		\ifthenelse{
-			\equal{\thestring}{scaled}
-		}{
-			\def\violin@scaled{true}
-		}{}
-		\ifthenelse{
-			\equal{\thestring}{datapoints}
-		}{
-			\def\violin@datapoints{true}
-		}{}
-		\ifthenelse{
-			\equal{\thestring}{averages}
-		}{
-			\def\violin@averages{true}
-		}{}
-		\ifthenelse{
-			\equal{\thestring}{nomirror}
-		}{
-			\def\violin@nomirror{true}
-		}{}
-		\ifthenelse{
-			\equal{\thestring}{reverseaxis}
-		}{
-			\def\violin@reverseaxis{true}
-		}{}
-	}
-
-	\ifthenelse{
-		\equal{\violin@reverseaxis}{true}
-	}{
+	\ifviolin@reverseaxis
 		\begin{axis}[
 			axis on top,
 			yticklabels={,,},
@@ -188,7 +164,7 @@
 			\violin@axisoptions,
 		]
 		\end{axis}
-	}{
+	\else
 		\begin{axis}[
 			axis on top,
 			xticklabels={,,},
@@ -196,7 +172,7 @@
 			\violin@axisoptions,
 		]
 		\end{axis}
-	}
+	\fi
 
 	\@for\kdeoption:=\violin@axisoptions\do{
 		\noblanks[e]{\kdeoption}
@@ -278,26 +254,22 @@
 	\pgfmathparse{\violin@dataset@average/\violin@dataset@weightsum}
 	\let\violin@dataset@average\pgfmathresult
 
-	\ifthenelse{
-		\equal{\violin@datapoints}{true}
-	}{
+	\ifviolin@datapoints
 		\pgfplotstablecreatecol[
 			create col/assign/.code={
 				\let\entry\violin@delta
 				\pgfkeyslet{/pgfplots/table/create col/next content}\entry
 			}
 		]{deltacol}\theviolin@dataset@table
-	}{}
+	\fi
 
-	\ifthenelse{
-		\equal{\violin@reverseaxis}{true}
-	}{
+	\ifviolin@reverseaxis
 		\def\violin@axis@x{y}
 		\def\violin@axis@y{x}
-	}{
+	\else
 		\def\violin@axis@x{x}
 		\def\violin@axis@y{y}
-	}
+	\fi
 
 	% Bandwidth calculation
 	\ifthenelse{%
@@ -495,29 +467,30 @@
 			}{
 				\let\cell\pgfplotstablezero
 			}{
-				\ifthenelse{
-					\equal{\violin@nomirror}{true}
-				}{
+				\ifviolin@nomirror
 					\pgfmathparse{1.9}
-				}{
+				\else
 					\pgfmathparse{1}
-				}
+				\fi
 				\let\violin@mirror@factor\pgfmathresult
-				\ifthenelse{
-					\equal{\violin@scaled}{true}
-				}{
+				\ifviolin@scaled
 					\pgfmathparse{\violin@delta+\violin@mirror@factor*0.5*\cell/\violin@kde@max}
-				}{
+				\else
 					\pgfmathparse{\violin@delta+\violin@mirror@factor*\cell}
-				}
+				\fi
 				\let\cell\pgfmathresult
 			}
 		}
 	}
 
-	\ifthenelse{
-		\equal{\violin@nomirror}{false}
-	}{
+	\ifviolin@nomirror
+		\ifviolin@invert
+			\pgfplotstablemodifyeachcolumnelement{kdecol}\of\violin@kde\as\cell{%
+				\pgfmathparse{-\cell+2*\violin@delta}
+				\let\cell\pgfmathresult
+			}
+		\fi
+	\else
 		\pgfplotstablecreatecol[
 			create col/assign/.code={
 				\pgfmathparse{-\thisrow{kdecol}+2*\violin@delta}
@@ -525,34 +498,23 @@
 				\pgfkeyslet{/pgfplots/table/create col/next content}\entry
 			}
 		]{kdecolinv}\violin@kde
-	}{
-		\ifthenelse{
-			\equal{\violin@invert}{true}
-		}{
-			\pgfplotstablemodifyeachcolumnelement{kdecol}\of\violin@kde\as\cell{%
-				\pgfmathparse{-\cell+2*\violin@delta}
-				\let\cell\pgfmathresult
-			}
-		}{}
-	}
+	\fi
 
-	\ifthenelse{
-		\equal{\violin@reverseaxis}{true}
-	}{
+	\ifviolin@reverseaxis
 		\pgfkeys{
 			/pgfplots/xticklabels={,,},
 			/pgfplots/yticklabels={\violin@label},
 			/pgfplots/ytick={\violin@delta},
 			/pgfplots/xmajorticks=false,
 		}
-	}{
+	\else
 		\pgfkeys{
 			/pgfplots/yticklabels={,,},
 			/pgfplots/xticklabels={\violin@label},
 			/pgfplots/xtick={\violin@delta},
 			/pgfplots/ymajorticks=false,
 		}
-	}
+	\fi
 
 	\begin{axis}[
 		\violin@axisoptions,
@@ -575,9 +537,25 @@
 		] table [
 			\violin@axis@x=kdecol, \violin@axis@y=list
 		] {\violin@kde};
-		\ifthenelse{
-			\equal{\violin@nomirror}{false}
-		}{
+		\ifviolin@nomirror
+			\ifviolin@reverseaxis
+				\addplot[
+					no marks,
+					color=black,
+				] coordinates {
+					(\pgfkeysvalueof{/pgfplots/xmin},\violin@delta)%
+					(\pgfkeysvalueof{/pgfplots/xmax},\violin@delta)
+				};
+			\else
+				\addplot[
+					no marks,
+					color=black,
+				] coordinates {
+					(\violin@delta,\pgfkeysvalueof{/pgfplots/ymin})%
+					(\violin@delta,\pgfkeysvalueof{/pgfplots/ymax})
+				};
+			\fi
+		\else
 			\addplot[
 				no marks,
 				color=\violin@color,
@@ -591,36 +569,9 @@
 			] table [
 				\violin@axis@x=kdecolinv, \violin@axis@y=list
 			] {\violin@kde};
-		}{}
-		\ifthenelse{
-			\equal{\violin@nomirror}{true}
-		}{
-			\ifthenelse{
-				\equal{\violin@reverseaxis}{false}
-			}{
-				\addplot[
-					no marks,
-					color=black,
-				] coordinates {
-					(\violin@delta,\pgfkeysvalueof{/pgfplots/ymin})%
-					(\violin@delta,\pgfkeysvalueof{/pgfplots/ymax})
-				};
-			}{
-				\addplot[
-					no marks,
-					color=black,
-				] coordinates {
-					(\pgfkeysvalueof{/pgfplots/xmin},\violin@delta)%
-					(\pgfkeysvalueof{/pgfplots/xmax},\violin@delta)
-				};
-			}
-		}{}
-		\ifthenelse{
-			\equal{\violin@averages}{true}
-		}{
-			\ifthenelse{
-				\equal{\violin@reverseaxis}{true}
-			}{
+		\fi
+		\ifviolin@averages
+			\ifviolin@reverseaxis
 				\addplot[
 					only marks,
 					mark=\violin@avg@mark,
@@ -632,7 +583,7 @@
 				] coordinates {
 					(\violin@dataset@average,\violin@delta)
 				};
-			}{
+			\else
 				\addplot[
 					only marks,
 					mark=\violin@avg@mark,
@@ -644,11 +595,9 @@
 				] coordinates {
 					(\violin@delta,\violin@dataset@average)
 				};
-			}
-		}{}
-		\ifthenelse{
-			\equal{\violin@datapoints}{true}
-		}{
+			\fi
+		\fi
+		\ifviolin@datapoints
 			\addplot[
 				only marks,
 				mark=\violin@pts@mark,
@@ -662,7 +611,7 @@
 				\violin@axis@x=deltacol,
 				\violin@axis@y=\violin@index,
 			] {\theviolin@dataset@table};
-		}{}
+		\fi
 	\end{axis}
 
 }
