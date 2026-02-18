@@ -205,25 +205,25 @@
 		\ifthenelse{
 			\equal{\theresult}{0}
 		}{}{
-			\let\violin@axis@xmin\violin@opt
+			\let\violin@axis@xmin\kdeoption
 		}
 		\whereisword[q]{\violin@opt}{xmax}
 		\ifthenelse{
 			\equal{\theresult}{0}
 		}{}{
-			\let\violin@axis@xmax\violin@opt
+			\let\violin@axis@xmax\kdeoption
 		}
 		\whereisword[q]{\violin@opt}{ymin}
 		\ifthenelse{
 			\equal{\theresult}{0}
 		}{}{
-			\let\violin@axis@ymin\violin@opt
+			\let\violin@axis@ymin\kdeoption
 		}
 		\whereisword[q]{\violin@opt}{ymax}
 		\ifthenelse{
 			\equal{\theresult}{0}
 		}{}{
-			\let\violin@axis@ymax\violin@opt
+			\let\violin@axis@ymax\kdeoption
 		}
 	}
 
