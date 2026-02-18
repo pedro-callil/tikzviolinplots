@@ -163,24 +163,6 @@
 	\pgfkeysalsofrom{\violin@args}
 	\def\violin@axisoptions{#2}
 
-	\ifviolin@reverseaxis
-		\begin{axis}[
-			axis on top,
-			yticklabels={,,},
-			ymajorticks=false,
-			\violin@axisoptions,
-		]
-		\end{axis}
-	\else
-		\begin{axis}[
-			axis on top,
-			xticklabels={,,},
-			xmajorticks=false,
-			\violin@axisoptions,
-		]
-		\end{axis}
-	\fi
-
 	\@for\kdeoption:=\violin@axisoptions\do{
 		\noblanks[e]{\kdeoption}
 		\let\violin@opt\thestring
@@ -219,9 +201,8 @@
 
 }
 
-\newcommand{\violinplot}[2][]{%
-
-	\pgfkeys{/violinplot, default, #1}
+\newcommand{\addviolinplot}[2][]{%
+	\pgfkeys{/violinplot, #1}
 
 	\def\violin@filename{#2}
 
@@ -507,30 +488,6 @@
 		]{kdecolinv}\violin@kde
 	\fi
 
-	\ifviolin@reverseaxis
-		\pgfkeys{
-			/pgfplots/xticklabels={,,},
-			/pgfplots/yticklabels={\violin@label},
-			/pgfplots/ytick={\violin@delta},
-			/pgfplots/xmajorticks=false,
-		}
-	\else
-		\pgfkeys{
-			/pgfplots/yticklabels={,,},
-			/pgfplots/xticklabels={\violin@label},
-			/pgfplots/xtick={\violin@delta},
-			/pgfplots/ymajorticks=false,
-		}
-	\fi
-
-	\begin{axis}[
-		\violin@axisoptions,
-		axis on top,
-		axis line style={draw=none},
-		tick style={draw=none},
-		xticklabel style={\violin@datalabelstyle},
-		yticklabel style={\violin@datalabelstyle},
-	]
 		\addplot[
 			no marks,
 			color=\violin@color,
@@ -619,8 +576,6 @@
 				\violin@axis@y=\violin@index,
 			] {\theviolin@dataset@table};
 		\fi
-	\end{axis}
-
 }
 
 \newcommand{\violin@getnth}[2]{%
@@ -641,9 +596,42 @@
 	}
 }
 
-\newcommand{\violinplotwholefile}[2][]{%
+\newcommand{\violinplot}[2][]{%
+	\pgfkeys{/violinplot, default}
+	\pgfkeysalsofrom{\violin@args}
+	\pgfkeys{/violinplot, #1}
 
-	\pgfkeys{/violinplotwholefile, default, #1}
+	\ifviolin@reverseaxis
+		\pgfkeys{
+			/pgfplots/xticklabels={,,},
+			/pgfplots/yticklabels/.expand once={\violin@label},
+			/pgfplots/ytick/.expand once={\violin@delta},
+			/pgfplots/yticklabel style={\violin@datalabelstyle},
+			/pgfplots/xmajorticks=false,
+		}
+	\else
+		\pgfkeys{
+			/pgfplots/yticklabels={,,},
+			/pgfplots/xticklabels/.expand once={\violin@label},
+			/pgfplots/xtick/.expand once={\violin@delta},
+			/pgfplots/xticklabel style={\violin@datalabelstyle},
+			/pgfplots/ymajorticks=false,
+		}
+	\fi
+
+	\begin{axis}[
+		axis on top,
+	]
+		\addviolinplot{#2}
+	\end{axis}
+}
+
+\newcommand{\violinplotwholefile}[2][]{%
+	\pgfkeys{/violinplot, default}
+	\pgfkeys{/violinplotwholefile, default}
+	\pgfkeysalsofrom{\violin@args}
+	\pgfkeys{/violinplotwholefile, #1}
+
 	\def\violin@batch@filename{#2}
 
 	\pgfmathparse{0}
@@ -658,52 +646,80 @@
 	\let\violin@batch@counter\pgfmathresult
 	\let\violin@batch@relativepos\pgfmathresult
 
-	\@for\violin@batch@index:=\violin@batch@indexes\do{
-		\ifthenelse{%
-			\equal{1}{\violin@batch@numofplots}
-		}{%
-			\pgfmathparse{50}
-		}{%
-			\pgfmathparse{int(\violin@batch@counter*%
-				(100/(\violin@batch@numofplots-1)))}
+	\pgfmathparse{1}
+	\let\violin@batch@start\pgfmathresult
+	\pgfmathparse{1+\violin@batch@delta}
+	\let\violin@batch@step\pgfmathresult
+	\pgfmathparse{\violin@batch@delta*(\violin@batch@numofplots-\violin@batch@start)+\violin@batch@start}
+	\let\violin@batch@stop\pgfmathresult
+
+	\ifviolin@reverseaxis
+		\pgfkeys{
+			/pgfplots/xticklabels={,,},
+			/pgfplots/yticklabels/.expand once={\violin@batch@labels},
+			/pgfplots/ytick/.expand once={\violin@batch@start, \violin@batch@step, ..., \violin@batch@stop},
+			/pgfplots/yticklabel style={\violin@batch@datalabelstyle},
+			/pgfplots/xmajorticks=false,
 		}
-		\let\violin@batch@color@deg\pgfmathresult
-		\edef\violin@batch@color{\violin@batch@color@primary!\violin@batch@color@deg!\violin@batch@color@secondary}
+	\else
+		\pgfkeys{
+			/pgfplots/yticklabels={,,},
+			/pgfplots/xticklabels/.expand once={\violin@batch@labels},
+			/pgfplots/xtick/.expand once={\violin@batch@start, \violin@batch@step, ..., \violin@batch@stop},
+			/pgfplots/xticklabel style={\violin@batch@datalabelstyle},
+			/pgfplots/ymajorticks=false,
+		}
+	\fi
 
-		\violin@getnth{\violin@batch@labels}{\violin@batch@counter}
-		\let\violin@batch@label\violin@nthelem
+	\begin{axis}[
+		axis on top,
+	]
+		\@for\violin@batch@index:=\violin@batch@indexes\do{
+			\ifthenelse{%
+				\equal{1}{\violin@batch@numofplots}
+			}{%
+				\pgfmathparse{50}
+			}{%
+				\pgfmathparse{int(\violin@batch@counter*%
+					(100/(\violin@batch@numofplots-1)))}
+			}
+			\let\violin@batch@color@deg\pgfmathresult
+			\edef\violin@batch@color{\violin@batch@color@primary!\violin@batch@color@deg!\violin@batch@color@secondary}
 
-		\pgfmathparse{1+\violin@batch@counter*\violin@batch@delta}
-		\let\violin@batch@relativepos\pgfmathresult
+			\violin@getnth{\violin@batch@labels}{\violin@batch@counter}
+			\let\violin@batch@label\violin@nthelem
 
-		\violinplot[%
-			col sep = \violin@batch@colsep,
-			bandwidth=\violin@batch@bandwidth,
-			kernel = \violin@batch@kernel,
-			index=\violin@batch@index,
-			relative position=\violin@batch@relativepos,
-			samples = \violin@batch@samples,
-			color=\violin@batch@color,
-			label={\violin@batch@label},
-			data label style={\violin@batch@datalabelstyle},
-			average mark = \violin@batch@avg@mark,
-			average size = \violin@batch@avg@size,
-			average color = \violin@batch@avg@color,
-			average opacity = \violin@batch@avg@opacity,
-			average fill = \violin@batch@avg@fillcolor,
-			average fill opacity = \violin@batch@avg@fillopacity,
-			dataset mark = \violin@batch@pts@mark,
-			dataset size = \violin@batch@pts@size,
-			dataset color = \violin@batch@pts@color,
-			dataset opacity = \violin@batch@pts@opacity,
-			dataset fill = \violin@batch@pts@fillcolor,
-			dataset fill opacity = \violin@batch@pts@fillopacity,
-			dataset jitter = \violin@batch@pts@jitter
-		]{\violin@batch@filename}
+			\pgfmathparse{1+\violin@batch@counter*\violin@batch@delta}
+			\let\violin@batch@relativepos\pgfmathresult
 
-		\pgfmathparse{int(\violin@batch@counter+1)}
-		\let\violin@batch@counter\pgfmathresult
-	}
+			\addviolinplot[%
+				col sep = \violin@batch@colsep,
+				bandwidth=\violin@batch@bandwidth,
+				kernel = \violin@batch@kernel,
+				index=\violin@batch@index,
+				relative position=\violin@batch@relativepos,
+				samples = \violin@batch@samples,
+				color=\violin@batch@color,
+				label={\violin@batch@label},
+				data label style={\violin@batch@datalabelstyle},
+				average mark = \violin@batch@avg@mark,
+				average size = \violin@batch@avg@size,
+				average color = \violin@batch@avg@color,
+				average opacity = \violin@batch@avg@opacity,
+				average fill = \violin@batch@avg@fillcolor,
+				average fill opacity = \violin@batch@avg@fillopacity,
+				dataset mark = \violin@batch@pts@mark,
+				dataset size = \violin@batch@pts@size,
+				dataset color = \violin@batch@pts@color,
+				dataset opacity = \violin@batch@pts@opacity,
+				dataset fill = \violin@batch@pts@fillcolor,
+				dataset fill opacity = \violin@batch@pts@fillopacity,
+				dataset jitter = \violin@batch@pts@jitter
+			]{\violin@batch@filename}
 
+			\pgfmathparse{int(\violin@batch@counter+1)}
+			\let\violin@batch@counter\pgfmathresult
+		}
+	\end{axis}
 }
 
