@@ -485,24 +485,38 @@
 				\let\entry\pgfmathresult
 				\pgfkeyslet{/pgfplots/table/create col/next content}\entry
 			}
-		]{kdecolinv}\violin@kde
+		]{kdecolmirror}\violin@kde
+
+		\pgfplotstablenew[columns={list}]{\violin@samples}\violin@kdewithmirror
+		\pgfplotstablecreatecol[
+			copy column from table={\violin@kde}{kdecol}
+		]{kdecol}{\violin@kdewithmirror}
+		\pgfplotstablesort[
+			sort key=list,
+			sort cmp=float <,
+		]{\violin@kdewithmirror}{\violin@kdewithmirror}
+
+		\pgfplotstablenew[columns={list}]{\violin@samples}\violin@kdemirror
+		\pgfplotstablecreatecol[
+			copy column from table={\violin@kde}{kdecolmirror}
+		]{kdecol}{\violin@kdemirror}
+		\pgfplotstablesort[
+			sort key=list,
+			sort cmp=float >,
+		]{\violin@kdemirror}{\violin@kdemirror}
+
+		\pgfplotstablevertcat{\violin@kdewithmirror}{\violin@kdemirror}
 	\fi
 
-		\addplot[
-			no marks,
-			color=\violin@color,
-		] table [
-			\violin@axis@x=kdecol, \violin@axis@y=list
-		] {\violin@kde};
-		\addplot[
-			no marks,
-			fill=\violin@color,
-			opacity=0.50,
-		] table [
-			\violin@axis@x=kdecol, \violin@axis@y=list
-		] {\violin@kde};
 		\ifviolin@nomirror
 			\ifviolin@reverseaxis
+				\addplot[
+					no marks,
+					fill=\violin@color,
+					opacity=0.50,
+				] table [
+					\violin@axis@x=kdecol, \violin@axis@y=list
+				] {\violin@kde};
 				\addplot[
 					no marks,
 					color=black,
@@ -511,6 +525,13 @@
 					(\pgfkeysvalueof{/pgfplots/xmax},\violin@delta)
 				};
 			\else
+				\addplot[
+					no marks,
+					fill=\violin@color,
+					opacity=0.50,
+				] table [
+					\violin@axis@x=kdecol, \violin@axis@y=list
+				] {\violin@kde};
 				\addplot[
 					no marks,
 					color=black,
@@ -522,18 +543,13 @@
 		\else
 			\addplot[
 				no marks,
-				color=\violin@color,
-			] table [
-				\violin@axis@x=kdecolinv, \violin@axis@y=list
-			] {\violin@kde};
-			\addplot[
-				no marks,
 				fill=\violin@color,
 				opacity=0.50,
 			] table [
-				\violin@axis@x=kdecolinv, \violin@axis@y=list
-			] {\violin@kde};
+				\violin@axis@x=kdecol, \violin@axis@y=list
+			] {\violin@kdewithmirror};
 		\fi
+
 		\ifviolin@averages
 			\ifviolin@reverseaxis
 				\addplot[
@@ -561,6 +577,7 @@
 				};
 			\fi
 		\fi
+
 		\ifviolin@datapoints
 			\addplot[
 				only marks,
