@@ -164,6 +164,9 @@
 		/handler config=all,
 	}
 	\pgfkeysalsofrom{\violin@args}
+
+	\pgfmathparse{0}
+	\let\violin@numofplots\pgfmathresult  % Needed to distinguish first plot from others in \violinplot
 }
 
 \newcommand{\addviolinplot}[2][]{%
@@ -621,11 +624,31 @@
 		}
 	\fi
 
+	\pgfmathparse{\violin@numofplots!=0}  % Current plot is not first plot
+	\ifnum\pgfmathresult=1
+		\ifviolin@reverseaxis
+			\pgfplotsset{hide x axis}
+		\else
+			\pgfplotsset{hide y axis}
+		\fi
+
+		\pgfplotsset{
+			title={},
+			xlabel={},
+			ylabel={},
+			axis line style={draw=none},
+			grid={none},
+		}
+	\fi
+
 	\begin{axis}[
 		axis on top,
 	]
 		\addviolinplot{#2}
 	\end{axis}
+
+	\pgfmathparse{int(\violin@numofplots+1)}
+	\let\violin@numofplots\pgfmathresult
 }
 
 \newcommand{\violinplotwholefile}[2][]{%
