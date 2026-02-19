@@ -195,6 +195,8 @@
 
 	\edef\violin@filename{#2}
 
+	\pgfkeys{/pgf/fpu}
+
 	\pgfplotstableread[%
 		col sep=\violin@colsep,
 		trim cells=true,
@@ -286,6 +288,7 @@
 		\pgfmathparse{%
 			\xi > \violin@dataset@min ? int(0) : int(1)%
 		}
+		\pgfmathfloattoint{\pgfmathresult}
 		\ifthenelse{
 			\pgfmathresult = 1
 		}{
@@ -300,6 +303,7 @@
 		\pgfmathparse{%
 			\xi < \violin@dataset@max ? int(0) : int(1)%
 		}
+		\pgfmathfloattoint{\pgfmathresult}
 		\ifthenelse{
 			\pgfmathresult = 1
 		}{
@@ -371,6 +375,7 @@
 					\pgfmathparse{%
 						abs(\violin@u) < 1 ? int(0) : int(1)%
 					}
+					\pgfmathfloattoint{\pgfmathresult}
 					\ifthenelse{
 						\equal{\pgfmathresult}{0}
 					}{
@@ -388,6 +393,7 @@
 					\pgfmathparse{%
 						abs(\violin@u) < 1 ? int(0) : int(1)%
 					}
+					\pgfmathfloattoint{\pgfmathresult}
 					\ifthenelse{
 						\equal{\pgfmathresult}{0}
 					}{
@@ -403,6 +409,7 @@
 					\pgfmathparse{%
 						abs(\violin@u) < 1 ? int(0) : int(1)%
 					}
+					\pgfmathfloattoint{\pgfmathresult}
 					\ifthenelse{
 						\equal{\pgfmathresult}{0}
 					}{
@@ -424,6 +431,7 @@
 		\pgfmathparse{%
 			\entry < \violin@kde@max ? int(0) : int(1)%
 		}
+		\pgfmathfloattoint{\pgfmathresult}
 		\ifthenelse{
 			\pgfmathresult = 1
 		}{
@@ -440,6 +448,7 @@
 			\let\cell\pgfplotstablezero
 		}{
 			\pgfmathparse{int(\violin@samples-1)}
+			\pgfmathfloattoint{\pgfmathresult}
 			\ifthenelse{
 				\pgfplotstablerow = \pgfmathresult
 			}{
@@ -497,6 +506,8 @@
 
 		\pgfplotstablevertcat{\violin@kdewithmirror}{\violin@kdemirror}
 	\fi
+
+	\pgfkeys{/pgf/fpu=false}
 
 	\ifviolin@nomirror
 		\ifviolin@reverseaxis
