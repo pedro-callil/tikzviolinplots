@@ -21,7 +21,6 @@
 
 \RequirePackage{pgfplots}
 \RequirePackage{pgfplotstable}
-\RequirePackage{ifthen}
 \RequirePackage{pgfkeys}
 
 
@@ -213,18 +212,17 @@
 	\let\violin@weight@row\pgfmathresult
 
 	% Calculating averages
+	\def\violin@frequencies@default{FREQINTERNALVIOLIN}
 	\pgfplotstableforeachcolumnelement{\violin@index}\of\theviolin@dataset@table\as\xi{%
-		\ifthenelse{
-			\equal{\violin@frequencies}{FREQINTERNALVIOLIN}
-		}{
+		\ifx\violin@frequencies\violin@frequencies@default
 			\pgfmathqparse{1}
 			\let\violin@dataset@weight\pgfmathresult
-		}{
+		\else
 			\pgfplotstablegetelem{\violin@weight@row}{\violin@frequencies}\of{\theviolin@dataset@table}
 			\let\violin@dataset@weight\pgfplotsretval
 			\pgfmathparse{\violin@weight@row+1}
 			\let\violin@weight@row\pgfmathresult
-		}
+		\fi
 		\pgfmathparse{\violin@dataset@weightsum+\violin@dataset@weight}
 		\let\violin@dataset@weightsum\pgfmathresult
 		\pgfmathparse{\violin@dataset@average+\xi*\violin@dataset@weight}
@@ -251,24 +249,21 @@
 	\fi
 
 	% Bandwidth calculation
-	\ifthenelse{%
-		\equal{\violin@bandwidth}{NONE}%
-	}{%
+	\def\violin@bandwidth@default{NONE}
+	\ifx\violin@bandwidth\violin@bandwidth@default
 		\pgfmathqparse{0}
 		\let\violin@weight@row\pgfmathresult
 		% Standard deviation calculation
 		\pgfplotstableforeachcolumnelement{\violin@index}\of\theviolin@dataset@table\as\xi{%
-			\ifthenelse{
-				\equal{\violin@frequencies}{FREQINTERNALVIOLIN}
-			}{
+			\ifx\violin@frequencies\violin@frequencies@default
 				\pgfmathqparse{1}
 				\let\violin@dataset@weight\pgfmathresult
-			}{
+			\else
 				\pgfplotstablegetelem{\violin@weight@row}{\violin@frequencies}\of{\theviolin@dataset@table}
 				\let\violin@dataset@weight\pgfplotsretval
 				\pgfmathparse{\violin@weight@row+1}
 				\let\violin@weight@row\pgfmathresult
-			}
+			\fi
 			\pgfmathparse{\violin@dataset@stddev+\violin@dataset@weight*(\xi-\violin@dataset@average)^2}
 			\let\violin@dataset@stddev\pgfmathresult
 		}
@@ -276,40 +271,30 @@
 		\let\violin@dataset@stddev\pgfmathresult
 		\pgfmathparse{1.06*\violin@dataset@stddev*(\violin@dataset@weightsum^(-0.2))}%
 		\let\violin@bandwidthcalc\pgfmathresult
-	}{%
+	\else
 		\let\violin@bandwidthcalc\violin@bandwidth
-	}
+	\fi
 
 	% Setting limits for curve
 	\pgfplotstablegetelem{0}{\violin@index}\of{\theviolin@dataset@table}
 	\let\violin@dataset@min\pgfplotsretval
 	\let\violin@dataset@max\pgfplotsretval
 	\pgfplotstableforeachcolumnelement{\violin@index}\of\theviolin@dataset@table\as\xi{%
-		\pgfmathparse{%
-			\xi > \violin@dataset@min ? int(0) : int(1)%
-		}
+		\pgfmathparse{\xi > \violin@dataset@min}
 		\pgfmathfloattoint{\pgfmathresult}
-		\ifthenelse{
-			\pgfmathresult = 1
-		}{
+		\ifnum\pgfmathresult=0
 			\let\violin@dataset@min\xi
-		}{
-		}
+		\fi
 	}
 	\pgfmathparse{\violin@dataset@min - 3*\violin@bandwidthcalc}
 	\let\violin@dataset@min\pgfmathresult
 
 	\pgfplotstableforeachcolumnelement{\violin@index}\of\theviolin@dataset@table\as\xi{%
-		\pgfmathparse{%
-			\xi < \violin@dataset@max ? int(0) : int(1)%
-		}
+		\pgfmathparse{\xi < \violin@dataset@max}
 		\pgfmathfloattoint{\pgfmathresult}
-		\ifthenelse{
-			\pgfmathresult = 1
-		}{
+		\ifnum\pgfmathresult=0
 			\let\violin@dataset@max\xi
-		}{
-		}
+		\fi
 	}
 	\pgfmathparse{\violin@dataset@max + 3*\violin@bandwidthcalc}
 	\let\violin@dataset@max\pgfmathresult
@@ -329,6 +314,12 @@
 	\pgfmathqparse{0}
 	\let\violin@kde@max\pgfmathresult
 
+	\def\violin@kernel@gaussian{gaussian}
+	\def\violin@kernel@logistic{logistic}
+	\def\violin@kernel@parabolic{parabolic}
+	\def\violin@kernel@uniform{uniform}
+	\def\violin@kernel@triangular{triangular}
+
 	\pgfplotstablecreatecol[
 		create col/assign/.code={
 			\pgfmathparse{%
@@ -339,87 +330,64 @@
 			\let\violin@kde@accum\pgfmathresult
 			\let\violin@weight@row\pgfmathresult
 			\pgfplotstableforeachcolumnelement{\violin@index}\of\theviolin@dataset@table\as\xi{%
-				\ifthenelse{
-					\equal{\violin@frequencies}{FREQINTERNALVIOLIN}
-				}{
+				\ifx\violin@frequencies\violin@frequencies@default
 					\pgfmathqparse{1}
 					\let\violin@dataset@weight\pgfmathresult
-				}{
+				\else
 					\pgfplotstablegetelem{\violin@weight@row}{\violin@frequencies}\of{\theviolin@dataset@table}
 					\let\violin@dataset@weight\pgfplotsretval
 					\pgfmathparse{\violin@weight@row+1}
 					\let\violin@weight@row\pgfmathresult
-				}
+				\fi
 				\pgfmathparse{%
 					((\xi-\thisrow{list})/%
 					\violin@bandwidthcalc)}
 				\let\violin@u\pgfmathresult
-				\ifthenelse{
-					\equal{\violin@kernel}{gaussian}
-				}{
+				%
+				\ifx\violin@kernel\violin@kernel@gaussian
 					\pgfmathparse{\violin@kde@accum + %
 						\violin@dataset@weight*e^(-0.5*\violin@u*\violin@u)/sqrt(2*pi)}
 					\let\violin@kde@accum\pgfmathresult
-				}{}
-				\ifthenelse{
-					\equal{\violin@kernel}{logistic}
-				}{
+				\fi
+				\ifx\violin@kernel\violin@kernel@logistic
 					\pgfmathparse{\violin@kde@accum + %
 						\violin@dataset@weight*1/(e^\violin@u + 2 + e^(-\violin@u))
 					}
 					\let\violin@kde@accum\pgfmathresult
-				}{}
-				\ifthenelse{
-					\equal{\violin@kernel}{parabolic}
-				}{
-					\pgfmathparse{%
-						abs(\violin@u) < 1 ? int(0) : int(1)%
-					}
+				\fi
+				\ifx\violin@kernel\violin@kernel@parabolic
+					\pgfmathparse{abs(\violin@u) < 1}
 					\pgfmathfloattoint{\pgfmathresult}
-					\ifthenelse{
-						\equal{\pgfmathresult}{0}
-					}{
+					\ifnum\pgfmathresult=1
 						\pgfmathparse{\violin@kde@accum + %
 							\violin@dataset@weight*0.75*(1-\violin@u*\violin@u)
 						}
-					}{
+					\else
 						\pgfmathparse{\violin@kde@accum}
-					}
+					\fi
 					\let\violin@kde@accum\pgfmathresult
-				}{}
-				\ifthenelse{
-					\equal{\violin@kernel}{uniform}
-				}{
-					\pgfmathparse{%
-						abs(\violin@u) < 1 ? int(0) : int(1)%
-					}
+				\fi
+				\ifx\violin@kernel\violin@kernel@uniform
+					\pgfmathparse{abs(\violin@u) < 1}
 					\pgfmathfloattoint{\pgfmathresult}
-					\ifthenelse{
-						\equal{\pgfmathresult}{0}
-					}{
+					\ifnum\pgfmathresult=1
 						\pgfmathparse{\violin@kde@accum + \violin@dataset@weight*0.5}
-					}{
+					\else
 						\pgfmathparse{\violin@kde@accum}
-					}
+					\fi
 					\let\violin@kde@accum\pgfmathresult
-				}{}
-				\ifthenelse{
-					\equal{\violin@kernel}{triangular}
-				}{
-					\pgfmathparse{%
-						abs(\violin@u) < 1 ? int(0) : int(1)%
-					}
+				\fi
+				\ifx\violin@kernel\violin@kernel@triangular
+					\pgfmathparse{abs(\violin@u) < 1}
 					\pgfmathfloattoint{\pgfmathresult}
-					\ifthenelse{
-						\equal{\pgfmathresult}{0}
-					}{
+					\ifnum\pgfmathresult=1
 						\pgfmathparse{\violin@kde@accum + %
 							\violin@dataset@weight*(1-abs(\violin@u))}
-					}{
+					\else
 						\pgfmathparse{\violin@kde@accum}
-					}
+					\fi
 					\let\violin@kde@accum\pgfmathresult
-				}{}
+				\fi
 			}
 			\pgfmathparse{\violin@kde@accum*\violin@kde@factor}
 			\let\entry\pgfmathresult
@@ -428,32 +396,23 @@
 	]{kdecol}\violin@kde
 
 	\pgfplotstableforeachcolumnelement{kdecol}\of\violin@kde\as\entry{%
-		\pgfmathparse{%
-			\entry < \violin@kde@max ? int(0) : int(1)%
-		}
+		\pgfmathparse{\entry < \violin@kde@max}
 		\pgfmathfloattoint{\pgfmathresult}
-		\ifthenelse{
-			\pgfmathresult = 1
-		}{
+		\ifnum\pgfmathresult=0
 			\let\violin@kde@max\entry
-		}{
-		}
+		\fi
 	}
 
 	\pgfplotstablemodifyeachcolumnelement{kdecol}\of\violin@kde\as\cell{%
 		\let\pgfplotstablezero\violin@delta
-		\ifthenelse{
-			\pgfplotstablerow = 0
-		}{
+		\ifnum\pgfplotstablerow=0
 			\let\cell\pgfplotstablezero
-		}{
+		\else
 			\pgfmathparse{int(\violin@samples-1)}
 			\pgfmathfloattoint{\pgfmathresult}
-			\ifthenelse{
-				\pgfplotstablerow = \pgfmathresult
-			}{
+			\ifnum\pgfplotstablerow=\pgfmathresult
 				\let\cell\pgfplotstablezero
-			}{
+			\else
 				\ifviolin@nomirror
 					\pgfmathqparse{1.9}
 				\else
@@ -466,8 +425,8 @@
 					\pgfmathparse{\violin@delta+\violin@mirror@factor*\cell}
 				\fi
 				\let\cell\pgfmathresult
-			}
-		}
+			\fi
+		\fi
 	}
 
 	\ifviolin@nomirror
@@ -625,16 +584,14 @@
 	\let\violin@getnth@counter\pgfmathresult
 	\let\violin@nthelem\pgfmathresult
 	\@for\violin@listelem:=#1\do{
-		\ifthenelse{
-			\equal{#2}{\violin@getnth@counter}
-		}{
+		\ifnum#2=\violin@getnth@counter
 			\let\violin@nthelem\violin@listelem
 			\pgfmathparse{int(\violin@getnth@counter+1)}
 			\let\violin@getnth@counter\pgfmathresult
-		}{
+		\else
 			\pgfmathparse{int(\violin@getnth@counter+1)}
 			\let\violin@getnth@counter\pgfmathresult
-		}
+		\fi
 	}
 }
 
@@ -729,14 +686,11 @@
 		axis on top,
 	]
 		\@for\violin@plotindex:=\violin@indexes\do{
-			\ifthenelse{%
-				\equal{1}{\violin@numofplots}
-			}{%
+			\ifnum\violin@numofplots=1
 				\pgfmathqparse{50}
-			}{%
-				\pgfmathparse{int(\violin@counter*%
-					(100/(\violin@numofplots-1)))}
-			}
+			\else
+				\pgfmathparse{int(\violin@counter*(100/(\violin@numofplots-1)))}
+			\fi
 			\let\violin@color@deg\pgfmathresult
 
 			\pgfmathparse{1+\violin@counter*\violin@spacing}
