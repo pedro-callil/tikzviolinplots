@@ -50,11 +50,16 @@
 		kernel=gaussian,
 		bandwidth=NONE,
 		index=DATA,
+		indexes={A,B,C},
 		frequencies=FREQINTERNALVIOLIN,
 		samples=50,
-		relative position=0
+		relative position=0,
+		spacing=1.0,
 		color=black,
+		primary color=blue,
+		secondary color=black,
 		label={LABEL},
+		labels={A,B,C},
 		data label style={},
 		invert=false,
 		average mark=x,
@@ -75,11 +80,16 @@
 	kernel/.estore in = \violin@kernel,
 	bandwidth/.estore in = \violin@bandwidth,
 	index/.estore in = \violin@index,
+	indexes/.estore in = \violin@indexes,
 	frequencies/.estore in = \violin@frequencies,
 	samples/.estore in = \violin@samples,
 	relative position/.estore in = \violin@delta,
+	spacing/.estore in = \violin@spacing,
 	color/.estore in = \violin@color,
+	primary color/.estore in = \violin@color@primary,
+	secondary color/.estore in = \violin@color@secondary,
 	label/.estore in = \violin@label,
+	labels/.estore in = \violin@labels,
 	data label style/.estore in = \violin@datalabelstyle,
 	average mark/.estore in = \violin@avg@mark,
 	average size/.estore in = \violin@avg@size,
@@ -94,63 +104,6 @@
 	dataset fill/.estore in = \violin@pts@fillcolor,
 	dataset fill opacity/.estore in = \violin@pts@fillopacity,
 	dataset jitter/.estore in = \violin@pts@jitter,
-	/violinplotwholefile/.is family, /violinplotwholefile,
-	default/.style = {
-		col sep=comma,
-		kernel=gaussian,
-		bandwidth=NONE,
-		index=DATA,
-		samples=50,
-		relative position=0
-		color=black,
-		label={LABEL},
-		average mark=x,
-		average size=3pt,
-		average color=black,
-		average opacity=1.0,
-		average fill=white,
-		average fill opacity=0.5,
-		dataset mark=*,
-		dataset size=1pt,
-		dataset color=black,
-		dataset opacity=1.0,
-		dataset fill=black,
-		dataset fill opacity=0.2,
-		dataset jitter=0.0,
-		spacing=1.0,
-		indexes={A,B,C},
-		primary color=blue,
-		secondary color=black,
-		labels={A,B,C},
-		data label style={},
-	},
-	col sep/.estore in = \violin@batch@colsep,
-	kernel/.estore in = \violin@batch@kernel,
-	bandwidth/.estore in = \violin@batch@bandwidth,
-	index/.estore in = \violin@batch@index,
-	samples/.estore in = \violin@batch@samples,
-	relative position/.estore in = \violin@batch@delta,
-	color/.estore in = \violin@batch@color,
-	label/.estore in = \violin@batch@label,
-	average mark/.estore in = \violin@batch@avg@mark,
-	average size/.estore in = \violin@batch@avg@size,
-	average color/.estore in = \violin@batch@avg@color,
-	average opacity/.estore in = \violin@batch@avg@opacity,
-	average fill/.estore in = \violin@batch@avg@fillcolor,
-	average fill opacity/.estore in = \violin@batch@avg@fillopacity,
-	dataset mark/.estore in = \violin@batch@pts@mark,
-	dataset size/.estore in = \violin@batch@pts@size,
-	dataset color/.estore in = \violin@batch@pts@color,
-	dataset opacity/.estore in = \violin@batch@pts@opacity,
-	dataset fill/.estore in = \violin@batch@pts@fillcolor,
-	dataset fill opacity/.estore in = \violin@batch@pts@fillopacity,
-	dataset jitter/.estore in = \violin@batch@pts@jitter,
-	spacing/.estore in = \violin@batch@delta,
-	indexes/.estore in = \violin@batch@indexes,
-	primary color/.estore in = \violin@batch@color@primary,
-	secondary color/.estore in = \violin@batch@color@secondary,
-	labels/.estore in = \violin@batch@labels,
-	data label style/.estore in = \violin@batch@datalabelstyle,
 }
 
 \newcommand{\violinsetoptions}[2][]{%
@@ -653,49 +606,47 @@
 
 \newcommand{\violinplotwholefile}[2][]{%
 	\pgfkeys{/violinplot, default}
-	\pgfkeys{/violinplotwholefile, default}
 	\pgfkeysalsofrom{\violin@args}
-	\pgfkeys{/violinplotwholefile, #1}
+	\pgfkeys{/violinplot, #1}
 
 	\def\violin@batch@filename{#2}
 
 	\pgfmathparse{0}
 	\let\violin@batch@numofplots\pgfmathresult
-	\@for\index:=\violin@batch@indexes\do{
+	\@for\index:=\violin@indexes\do{
 		\pgfmathparse{int(\violin@batch@numofplots+1)}
 		\let\violin@batch@numofplots\pgfmathresult
 	}
 
 	\pgfmathparse{0}
-	\let\violin@batch@color@deg\pgfmathresult
 	\let\violin@batch@counter\pgfmathresult
 	\let\violin@batch@relativepos\pgfmathresult
 
 	\pgfmathparse{1}
 	\let\violin@batch@start\pgfmathresult
-	\pgfmathparse{1+\violin@batch@delta}
+	\pgfmathparse{1+\violin@spacing}
 	\let\violin@batch@step\pgfmathresult
-	\pgfmathparse{\violin@batch@delta*(\violin@batch@numofplots-\violin@batch@start)+\violin@batch@start}
+	\pgfmathparse{\violin@spacing*(\violin@batch@numofplots-\violin@batch@start)+\violin@batch@start}
 	\let\violin@batch@stop\pgfmathresult
 
 	\ifviolin@reverseaxis
 		\pgfplotsset{
-			yticklabels/.expand once={\violin@batch@labels},
+			yticklabels/.expand once={\violin@labels},
 			ytick/.expand once={\violin@batch@start, \violin@batch@step, ..., \violin@batch@stop},
-			yticklabel style={\violin@batch@datalabelstyle},
+			yticklabel style={\violin@datalabelstyle},
 		}
 	\else
 		\pgfplotsset{
-			xticklabels/.expand once={\violin@batch@labels},
+			xticklabels/.expand once={\violin@labels},
 			xtick/.expand once={\violin@batch@start, \violin@batch@step, ..., \violin@batch@stop},
-			xticklabel style={\violin@batch@datalabelstyle},
+			xticklabel style={\violin@datalabelstyle},
 		}
 	\fi
 
 	\begin{axis}[
 		axis on top,
 	]
-		\@for\violin@batch@index:=\violin@batch@indexes\do{
+		\@for\violin@batch@index:=\violin@indexes\do{
 			\ifthenelse{%
 				\equal{1}{\violin@batch@numofplots}
 			}{%
@@ -705,37 +656,14 @@
 					(100/(\violin@batch@numofplots-1)))}
 			}
 			\let\violin@batch@color@deg\pgfmathresult
-			\edef\violin@batch@color{\violin@batch@color@primary!\violin@batch@color@deg!\violin@batch@color@secondary}
 
-			\violin@getnth{\violin@batch@labels}{\violin@batch@counter}
-			\let\violin@batch@label\violin@nthelem
-
-			\pgfmathparse{1+\violin@batch@counter*\violin@batch@delta}
+			\pgfmathparse{1+\violin@batch@counter*\violin@spacing}
 			\let\violin@batch@relativepos\pgfmathresult
 
 			\addviolinplot[%
-				col sep = \violin@batch@colsep,
-				bandwidth=\violin@batch@bandwidth,
-				kernel = \violin@batch@kernel,
 				index=\violin@batch@index,
 				relative position=\violin@batch@relativepos,
-				samples = \violin@batch@samples,
-				color=\violin@batch@color,
-				label={\violin@batch@label},
-				data label style={\violin@batch@datalabelstyle},
-				average mark = \violin@batch@avg@mark,
-				average size = \violin@batch@avg@size,
-				average color = \violin@batch@avg@color,
-				average opacity = \violin@batch@avg@opacity,
-				average fill = \violin@batch@avg@fillcolor,
-				average fill opacity = \violin@batch@avg@fillopacity,
-				dataset mark = \violin@batch@pts@mark,
-				dataset size = \violin@batch@pts@size,
-				dataset color = \violin@batch@pts@color,
-				dataset opacity = \violin@batch@pts@opacity,
-				dataset fill = \violin@batch@pts@fillcolor,
-				dataset fill opacity = \violin@batch@pts@fillopacity,
-				dataset jitter = \violin@batch@pts@jitter
+				color={\violin@color@primary!\violin@batch@color@deg!\violin@color@secondary},
 			]{\violin@batch@filename}
 
 			\pgfmathparse{int(\violin@batch@counter+1)}
