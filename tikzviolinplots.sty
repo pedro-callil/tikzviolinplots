@@ -610,36 +610,36 @@
 	\pgfkeysalsofrom{\violin@args}
 	\pgfkeys{/violinplot, #1}
 
-	\def\violin@batch@filename{#2}
+	\def\violin@filename{#2}
 
 	\pgfmathparse{0}
-	\let\violin@batch@numofplots\pgfmathresult
-	\@for\index:=\violin@indexes\do{
-		\pgfmathparse{int(\violin@batch@numofplots+1)}
-		\let\violin@batch@numofplots\pgfmathresult
+	\let\violin@numofplots\pgfmathresult
+	\@for\violin@plotindex:=\violin@indexes\do{
+		\pgfmathparse{int(\violin@numofplots+1)}
+		\let\violin@numofplots\pgfmathresult
 	}
 
 	\pgfmathparse{0}
-	\let\violin@batch@counter\pgfmathresult
-	\let\violin@batch@relativepos\pgfmathresult
+	\let\violin@counter\pgfmathresult
+	\let\violin@relativepos\pgfmathresult
 
 	\pgfmathparse{1}
-	\let\violin@batch@start\pgfmathresult
+	\let\violin@start\pgfmathresult
 	\pgfmathparse{1+\violin@spacing}
-	\let\violin@batch@step\pgfmathresult
-	\pgfmathparse{\violin@spacing*(\violin@batch@numofplots-\violin@batch@start)+\violin@batch@start}
-	\let\violin@batch@stop\pgfmathresult
+	\let\violin@step\pgfmathresult
+	\pgfmathparse{\violin@spacing*(\violin@numofplots-\violin@start)+\violin@start}
+	\let\violin@stop\pgfmathresult
 
 	\ifviolin@reverseaxis
 		\pgfplotsset{
 			yticklabels/.expand once={\violin@labels},
-			ytick/.expand once={\violin@batch@start, \violin@batch@step, ..., \violin@batch@stop},
+			ytick/.expand once={\violin@start, \violin@step, ..., \violin@stop},
 			yticklabel style={\violin@datalabelstyle},
 		}
 	\else
 		\pgfplotsset{
 			xticklabels/.expand once={\violin@labels},
-			xtick/.expand once={\violin@batch@start, \violin@batch@step, ..., \violin@batch@stop},
+			xtick/.expand once={\violin@start, \violin@step, ..., \violin@stop},
 			xticklabel style={\violin@datalabelstyle},
 		}
 	\fi
@@ -647,28 +647,28 @@
 	\begin{axis}[
 		axis on top,
 	]
-		\@for\violin@batch@index:=\violin@indexes\do{
+		\@for\violin@plotindex:=\violin@indexes\do{
 			\ifthenelse{%
-				\equal{1}{\violin@batch@numofplots}
+				\equal{1}{\violin@numofplots}
 			}{%
 				\pgfmathparse{50}
 			}{%
-				\pgfmathparse{int(\violin@batch@counter*%
-					(100/(\violin@batch@numofplots-1)))}
+				\pgfmathparse{int(\violin@counter*%
+					(100/(\violin@numofplots-1)))}
 			}
-			\let\violin@batch@color@deg\pgfmathresult
+			\let\violin@color@deg\pgfmathresult
 
-			\pgfmathparse{1+\violin@batch@counter*\violin@spacing}
-			\let\violin@batch@relativepos\pgfmathresult
+			\pgfmathparse{1+\violin@counter*\violin@spacing}
+			\let\violin@relativepos\pgfmathresult
 
 			\addviolinplot[%
-				index=\violin@batch@index,
-				relative position=\violin@batch@relativepos,
-				color={\violin@color@primary!\violin@batch@color@deg!\violin@color@secondary},
-			]{\violin@batch@filename}
+				index=\violin@plotindex,
+				relative position=\violin@relativepos,
+				color={\violin@color@primary!\violin@color@deg!\violin@color@secondary},
+			]{\violin@filename}
 
-			\pgfmathparse{int(\violin@batch@counter+1)}
-			\let\violin@batch@counter\pgfmathresult
+			\pgfmathparse{int(\violin@counter+1)}
+			\let\violin@counter\pgfmathresult
 		}
 	\end{axis}
 }
