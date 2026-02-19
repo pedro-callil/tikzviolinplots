@@ -205,8 +205,9 @@
 		\pgfmathparse{sqrt(\violin@dataset@stddev/\violin@dataset@weightsum)}
 		\let\violin@dataset@stddev\pgfmathresult
 		\pgfmathparse{1.06*\violin@dataset@stddev*(\violin@dataset@weightsum^(-0.2))}%
-		\let\violin@bandwidth\pgfmathresult
+		\let\violin@bandwidthcalc\pgfmathresult
 	}{%
+		\let\violin@bandwidthcalc\violin@bandwidth
 	}
 
 	% Setting limits for curve
@@ -224,7 +225,7 @@
 		}{
 		}
 	}
-	\pgfmathparse{\violin@dataset@min - 3*\violin@bandwidth}
+	\pgfmathparse{\violin@dataset@min - 3*\violin@bandwidthcalc}
 	\let\violin@dataset@min\pgfmathresult
 
 	\pgfplotstableforeachcolumnelement{\violin@index}\of\theviolin@dataset@table\as\xi{%
@@ -238,7 +239,7 @@
 		}{
 		}
 	}
-	\pgfmathparse{\violin@dataset@max + 3*\violin@bandwidth}
+	\pgfmathparse{\violin@dataset@max + 3*\violin@bandwidthcalc}
 	\let\violin@dataset@max\pgfmathresult
 
 	% Creating curve domain
@@ -259,7 +260,7 @@
 	\pgfplotstablecreatecol[
 		create col/assign/.code={
 			\pgfmathparse{%
-				1.0/(\violin@dataset@weightsum*\violin@bandwidth)
+				1.0/(\violin@dataset@weightsum*\violin@bandwidthcalc)
 			}
 			\let\violin@kde@factor\pgfmathresult
 			\pgfmathparse{0}
@@ -279,7 +280,7 @@
 				}
 				\pgfmathparse{%
 					((\xi-\thisrow{list})/%
-					\violin@bandwidth)}
+					\violin@bandwidthcalc)}
 				\let\violin@u\pgfmathresult
 				\ifthenelse{
 					\equal{\violin@kernel}{gaussian}
