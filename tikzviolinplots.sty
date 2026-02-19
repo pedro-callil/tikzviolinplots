@@ -186,7 +186,7 @@
 	}
 	\pgfkeysalsofrom{\violin@args}
 
-	\pgfmathparse{0}
+	\pgfmathqparse{0}
 	\let\violin@numofplots\pgfmathresult  % Needed to distinguish first plot from others in \violinplot
 }
 
@@ -204,7 +204,7 @@
 	\pgfmathparse{int(\pgfmathresult-1)}
 	\let\violin@filename@lastindex\pgfmathresult
 
-	\pgfmathparse{0}
+	\pgfmathqparse{0}
 	\let\violin@dataset@stddev\pgfmathresult
 	\let\violin@dataset@average\pgfmathresult
 	\let\violin@dataset@weightsum\pgfmathresult
@@ -215,7 +215,7 @@
 		\ifthenelse{
 			\equal{\violin@frequencies}{FREQINTERNALVIOLIN}
 		}{
-			\pgfmathparse{1}
+			\pgfmathqparse{1}
 			\let\violin@dataset@weight\pgfmathresult
 		}{
 			\pgfplotstablegetelem{\violin@weight@row}{\violin@frequencies}\of{\theviolin@dataset@table}
@@ -252,14 +252,14 @@
 	\ifthenelse{%
 		\equal{\violin@bandwidth}{NONE}%
 	}{%
-		\pgfmathparse{0}
+		\pgfmathqparse{0}
 		\let\violin@weight@row\pgfmathresult
 		% Standard deviation calculation
 		\pgfplotstableforeachcolumnelement{\violin@index}\of\theviolin@dataset@table\as\xi{%
 			\ifthenelse{
 				\equal{\violin@frequencies}{FREQINTERNALVIOLIN}
 			}{
-				\pgfmathparse{1}
+				\pgfmathqparse{1}
 				\let\violin@dataset@weight\pgfmathresult
 			}{
 				\pgfplotstablegetelem{\violin@weight@row}{\violin@frequencies}\of{\theviolin@dataset@table}
@@ -322,7 +322,7 @@
 	% Calculating KDE
 	\pgfplotstablenew[columns={list}]{\violin@samples}\violin@kde
 
-	\pgfmathparse{0.0}
+	\pgfmathqparse{0}
 	\let\violin@kde@max\pgfmathresult
 
 	\pgfplotstablecreatecol[
@@ -331,14 +331,14 @@
 				1.0/(\violin@dataset@weightsum*\violin@bandwidthcalc)
 			}
 			\let\violin@kde@factor\pgfmathresult
-			\pgfmathparse{0}
+			\pgfmathqparse{0}
 			\let\violin@kde@accum\pgfmathresult
 			\let\violin@weight@row\pgfmathresult
 			\pgfplotstableforeachcolumnelement{\violin@index}\of\theviolin@dataset@table\as\xi{%
 				\ifthenelse{
 					\equal{\violin@frequencies}{FREQINTERNALVIOLIN}
 				}{
-					\pgfmathparse{1}
+					\pgfmathqparse{1}
 					\let\violin@dataset@weight\pgfmathresult
 				}{
 					\pgfplotstablegetelem{\violin@weight@row}{\violin@frequencies}\of{\theviolin@dataset@table}
@@ -446,9 +446,9 @@
 				\let\cell\pgfplotstablezero
 			}{
 				\ifviolin@nomirror
-					\pgfmathparse{1.9}
+					\pgfmathqparse{1.9}
 				\else
-					\pgfmathparse{1}
+					\pgfmathqparse{1}
 				\fi
 				\let\violin@mirror@factor\pgfmathresult
 				\ifviolin@scaled
@@ -610,7 +610,7 @@
 }
 
 \newcommand{\violin@getnth}[2]{%
-	\pgfmathparse{int(0)}
+	\pgfmathqparse{0}
 	\let\violin@getnth@counter\pgfmathresult
 	\let\violin@nthelem\pgfmathresult
 	\@for\violin@listelem:=#1\do{
@@ -682,18 +682,18 @@
 
 	\def\violin@filename{#2}
 
-	\pgfmathparse{0}
+	\pgfmathqparse{0}
 	\let\violin@numofplots\pgfmathresult
 	\@for\violin@plotindex:=\violin@indexes\do{
 		\pgfmathparse{int(\violin@numofplots+1)}
 		\let\violin@numofplots\pgfmathresult
 	}
 
-	\pgfmathparse{0}
+	\pgfmathqparse{0}
 	\let\violin@counter\pgfmathresult
 	\let\violin@relativepos\pgfmathresult
 
-	\pgfmathparse{1}
+	\pgfmathqparse{1}
 	\let\violin@start\pgfmathresult
 	\pgfmathparse{1+\violin@spacing}
 	\let\violin@step\pgfmathresult
@@ -721,7 +721,7 @@
 			\ifthenelse{%
 				\equal{1}{\violin@numofplots}
 			}{%
-				\pgfmathparse{50}
+				\pgfmathqparse{50}
 			}{%
 				\pgfmathparse{int(\violin@counter*%
 					(100/(\violin@numofplots-1)))}
