@@ -125,7 +125,7 @@
 \newcommand{\addviolinplot}[2][]{%
 	\pgfkeys{/violinplot, #1}
 
-	\def\violin@filename{#2}
+	\edef\violin@filename{#2}
 
 	\pgfplotstableread[%
 		col sep=\violin@colsep,
@@ -564,6 +564,8 @@
 	\pgfkeysalsofrom{\violin@args}
 	\pgfkeys{/violinplot, #1}
 
+	\def\violin@filename{#2}
+
 	\ifviolin@reverseaxis
 		\pgfplotsset{
 			yticklabels/.expand once={\violin@label},
@@ -598,7 +600,7 @@
 	\begin{axis}[
 		axis on top,
 	]
-		\addviolinplot{#2}
+		\addviolinplot{\violin@filename}
 	\end{axis}
 
 	\pgfmathparse{int(\violin@numofplots+1)}
