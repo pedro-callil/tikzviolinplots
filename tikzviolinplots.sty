@@ -47,6 +47,10 @@
 	reverse axis/.is if=violin@reverseaxis,
 	invert/.is if=violin@invert,
 	%
+	xmin/.value required,
+	xmax/.value required,
+	ymin/.value required,
+	ymax/.value required,
 	col sep/.value required,
 	kernel/.value required,
 	bandwidth/.value required,
@@ -93,6 +97,10 @@
 	kernel/uniform/.code=\def\violin@kernel{uniform},
 	kernel/triangular/.code=\def\violin@kernel{triangular},
 	%
+	xmin/.store in = \violin@xmin,
+	xmax/.store in = \violin@xmax,
+	ymin/.store in = \violin@ymin,
+	ymax/.store in = \violin@ymax,
 	bandwidth/.store in = \violin@bandwidth,
 	index/.store in = \violin@index,
 	indexes/.store in = \violin@indexes,
@@ -119,6 +127,16 @@
 	dataset fill/.store in = \violin@pts@fillcolor,
 	dataset fill opacity/.store in = \violin@pts@fillopacity,
 	dataset jitter/.store in = \violin@pts@jitter,
+	%
+	xmin=-10,
+	xmax=10,
+	ymin=-10,
+	ymax=10,
+	%
+	xmin/.forward to = {/pgfplots/xmin},
+	xmax/.forward to = {/pgfplots/xmax},
+	ymin/.forward to = {/pgfplots/ymin},
+	ymax/.forward to = {/pgfplots/ymax},
 	%
 	default/.style = {
 		col sep=comma,
@@ -495,8 +513,8 @@
 					no marks,
 					color=black,
 				] coordinates {
-					(\pgfkeysvalueof{/pgfplots/xmin},\violin@delta)%
-					(\pgfkeysvalueof{/pgfplots/xmax},\violin@delta)
+					(\violin@xmin,\violin@delta)%
+					(\violin@xmax,\violin@delta)
 				};
 			}
 			\violin@addplot
@@ -516,8 +534,8 @@
 					no marks,
 					color=black,
 				] coordinates {
-					(\violin@delta,\pgfkeysvalueof{/pgfplots/ymin})%
-					(\violin@delta,\pgfkeysvalueof{/pgfplots/ymax})
+					(\violin@delta,\violin@ymin)%
+					(\violin@delta,\violin@ymax)
 				};
 			}
 			\violin@addplot
