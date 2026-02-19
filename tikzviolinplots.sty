@@ -111,6 +111,7 @@
 	color/.store in = \violin@color,
 	primary color/.store in = \violin@color@primary,
 	secondary color/.store in = \violin@color@secondary,
+	fill opacity/.store in = \violin@fillopacity,
 	label/.store in = \violin@label,
 	labels/.store in = \violin@labels,
 	data label style/.store in = \violin@datalabelstyle,
@@ -151,6 +152,7 @@
 		color=black,
 		primary color=blue,
 		secondary color=black,
+		fill opacity=0.5,
 		label={LABEL},
 		labels={A,B,C},
 		data label style={},
@@ -502,7 +504,7 @@
 				\noexpand\addplot[
 					no marks,
 					fill=\violin@color,
-					opacity=0.50,
+					fill opacity=\violin@fillopacity,
 				] table [
 					\violin@axis@x=kdecol, \violin@axis@y=list
 				] {\noexpand\violin@kde};
@@ -523,7 +525,7 @@
 				\noexpand\addplot[
 					no marks,
 					fill=\violin@color,
-					opacity=0.50,
+					fill opacity=\violin@fillopacity,
 				] table [
 					\violin@axis@x=kdecol, \violin@axis@y=list
 				] {\noexpand\violin@kde};
@@ -545,7 +547,7 @@
 			\noexpand\addplot[
 				no marks,
 				fill=\violin@color,
-				opacity=0.50,
+				fill opacity=\violin@fillopacity,
 			] table [
 				\violin@axis@x=kdecol, \violin@axis@y=list
 			] {\noexpand\violin@kdewithmirror};
