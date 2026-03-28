@@ -21,226 +21,180 @@
 
 \RequirePackage{pgfplots}
 \RequirePackage{pgfplotstable}
-\RequirePackage{ifthen}
-\RequirePackage{stringstrings}
 \RequirePackage{pgfkeys}
 
 
 \DeclareOption*{\PackageWarning{tikzviolinplots}{Unknown option: ‘\CurrentOption’}}
 \ProcessOptions\relax
 
+\newif\ifviolin@scaled
+\newif\ifviolin@datapoints
+\newif\ifviolin@averages
+\newif\ifviolin@nomirror
+\newif\ifviolin@reverseaxis
+\newif\ifviolin@invert
+
 \pgfkeys{
-	/violinplot/.is family, /violinplot,
+	/violinplot/.is family,
+	/violinplot/.search also=/pgfplots,
+	/violinplot,
+	%
+	scaled/.is if=violin@scaled,
+	data points/.is if=violin@datapoints,
+	averages/.is if=violin@averages,
+	no mirror/.is if=violin@nomirror,
+	reverse axis/.is if=violin@reverseaxis,
+	invert/.is if=violin@invert,
+	%
+	xmin/.value required,
+	xmax/.value required,
+	ymin/.value required,
+	ymax/.value required,
+	col sep/.value required,
+	kernel/.value required,
+	bandwidth/.value required,
+	index/.value required,
+	indexes/.value required,
+	frequencies/.value required,
+	samples/.value required,
+	relative position/.value required,
+	spacing/.value required,
+	color/.value required,
+	primary color/.value required,
+	secondary color/.value required,
+	fill opacity/.value required,
+	label/.value required,
+	labels/.value required,
+	data label style/.value required,
+	average mark/.value required,
+	average size/.value required,
+	average color/.value required,
+	average opacity/.value required,
+	average fill/.value required,
+	average fill opacity/.value required,
+	dataset mark/.value required,
+	dataset size/.value required,
+	dataset color/.value required,
+	dataset opacity/.value required,
+	dataset fill/.value required,
+	dataset fill opacity/.value required,
+	dataset jitter/.value required,
+	%
+	col sep/.is choice,
+	col sep/space/.code=\def\violin@colsep{space},
+	col sep/tab/.code=\def\violin@colsep{tab},
+	col sep/comma/.code=\def\violin@colsep{comma},
+	col sep/colon/.code=\def\violin@colsep{colon},
+	col sep/semicolon/.code=\def\violin@colsep{semicolon},
+	col sep/braces/.code=\def\violin@colsep{braces},
+	col sep/ampersand/.code=\def\violin@colsep{ampersand},
+	%
+	kernel/.is choice,
+	kernel/gaussian/.code=\def\violin@kernel{gaussian},
+	kernel/logistic/.code=\def\violin@kernel{logistic},
+	kernel/parabolic/.code=\def\violin@kernel{parabolic},
+	kernel/uniform/.code=\def\violin@kernel{uniform},
+	kernel/triangular/.code=\def\violin@kernel{triangular},
+	%
+	xmin/.store in = \violin@xmin,
+	xmax/.store in = \violin@xmax,
+	ymin/.store in = \violin@ymin,
+	ymax/.store in = \violin@ymax,
+	bandwidth/.store in = \violin@bandwidth,
+	index/.store in = \violin@index,
+	indexes/.store in = \violin@indexes,
+	frequencies/.store in = \violin@frequencies,
+	samples/.store in = \violin@samples,
+	relative position/.store in = \violin@delta,
+	spacing/.store in = \violin@spacing,
+	color/.store in = \violin@color,
+	primary color/.store in = \violin@color@primary,
+	secondary color/.store in = \violin@color@secondary,
+	fill opacity/.store in = \violin@fillopacity,
+	label/.store in = \violin@label,
+	labels/.store in = \violin@labels,
+	data label style/.store in = \violin@datalabelstyle,
+	average mark/.store in = \violin@avg@mark,
+	average size/.store in = \violin@avg@size,
+	average color/.store in = \violin@avg@color,
+	average opacity/.store in = \violin@avg@opacity,
+	average fill/.store in = \violin@avg@fillcolor,
+	average fill opacity/.store in = \violin@avg@fillopacity,
+	dataset mark/.store in = \violin@pts@mark,
+	dataset size/.store in = \violin@pts@size,
+	dataset color/.store in = \violin@pts@color,
+	dataset opacity/.store in = \violin@pts@opacity,
+	dataset fill/.store in = \violin@pts@fillcolor,
+	dataset fill opacity/.store in = \violin@pts@fillopacity,
+	dataset jitter/.store in = \violin@pts@jitter,
+	%
+	xmin=-10,
+	xmax=10,
+	ymin=-10,
+	ymax=10,
+	%
+	xmin/.forward to = {/pgfplots/xmin},
+	xmax/.forward to = {/pgfplots/xmax},
+	ymin/.forward to = {/pgfplots/ymin},
+	ymax/.forward to = {/pgfplots/ymax},
+	%
 	default/.style = {
 		col sep=comma,
 		kernel=gaussian,
 		bandwidth=NONE,
 		index=DATA,
+		indexes={A,B,C},
 		frequencies=FREQINTERNALVIOLIN,
 		samples=50,
-		relative position=0
-		color=black,
-		label={LABEL},
-		data label style={},
-		invert={FALSE},
-		average mark=x,
-		average size=3pt,
-		average color=black,
-		average opacity=1.0,
-		average fill=white,
-		average fill opacity=0.5,
-		dataset mark=*,
-		dataset size=1pt,
-		dataset color=black,
-		dataset opacity=1.0,
-		dataset fill=black,
-		dataset fill opacity=0.2,
-		dataset jitter=0.0,
-	},
-	col sep/.estore in = \violin@colsep,
-	kernel/.estore in = \violin@kernel,
-	bandwidth/.estore in = \violin@bandwidth,
-	index/.estore in = \violin@index,
-	frequencies/.estore in = \violin@frequencies,
-	samples/.estore in = \violin@samples,
-	relative position/.estore in = \violin@delta,
-	color/.estore in = \violin@color,
-	label/.estore in = \violin@label,
-	data label style/.estore in = \violin@datalabelstyle,
-	invert/.estore in = \violin@invert,
-	average mark/.estore in = \violin@avg@mark,
-	average size/.estore in = \violin@avg@size,
-	average color/.estore in = \violin@avg@color,
-	average opacity/.estore in = \violin@avg@opacity,
-	average fill/.estore in = \violin@avg@fillcolor,
-	average fill opacity/.estore in = \violin@avg@fillopacity,
-	dataset mark/.estore in = \violin@pts@mark,
-	dataset size/.estore in = \violin@pts@size,
-	dataset color/.estore in = \violin@pts@color,
-	dataset opacity/.estore in = \violin@pts@opacity,
-	dataset fill/.estore in = \violin@pts@fillcolor,
-	dataset fill opacity/.estore in = \violin@pts@fillopacity,
-	dataset jitter/.estore in = \violin@pts@jitter,
-	/violinplotwholefile/.is family, /violinplotwholefile,
-	default/.style = {
-		col sep=comma,
-		kernel=gaussian,
-		bandwidth=NONE,
-		index=DATA,
-		samples=50,
-		relative position=0
-		color=black,
-		label={LABEL},
-		average mark=x,
-		average size=3pt,
-		average color=black,
-		average opacity=1.0,
-		average fill=white,
-		average fill opacity=0.5,
-		dataset mark=*,
-		dataset size=1pt,
-		dataset color=black,
-		dataset opacity=1.0,
-		dataset fill=black,
-		dataset fill opacity=0.2,
-		dataset jitter=0.0,
+		relative position=0,
 		spacing=1.0,
-		indexes={A,B,C},
+		color=black,
 		primary color=blue,
 		secondary color=black,
+		fill opacity=0.5,
+		label={LABEL},
 		labels={A,B,C},
 		data label style={},
+		invert=false,
+		average mark=x,
+		average size=3pt,
+		average color=black,
+		average opacity=1.0,
+		average fill=white,
+		average fill opacity=0.5,
+		dataset mark=*,
+		dataset size=1pt,
+		dataset color=black,
+		dataset opacity=1.0,
+		dataset fill=black,
+		dataset fill opacity=0.2,
+		dataset jitter=0.0,
 	},
-	col sep/.estore in = \violin@batch@colsep,
-	kernel/.estore in = \violin@batch@kernel,
-	bandwidth/.estore in = \violin@batch@bandwidth,
-	index/.estore in = \violin@batch@index,
-	samples/.estore in = \violin@batch@samples,
-	relative position/.estore in = \violin@batch@delta,
-	color/.estore in = \violin@batch@color,
-	label/.estore in = \violin@batch@label,
-	average mark/.estore in = \violin@batch@avg@mark,
-	average size/.estore in = \violin@batch@avg@size,
-	average color/.estore in = \violin@batch@avg@color,
-	average opacity/.estore in = \violin@batch@avg@opacity,
-	average fill/.estore in = \violin@batch@avg@fillcolor,
-	average fill opacity/.estore in = \violin@batch@avg@fillopacity,
-	dataset mark/.estore in = \violin@batch@pts@mark,
-	dataset size/.estore in = \violin@batch@pts@size,
-	dataset color/.estore in = \violin@batch@pts@color,
-	dataset opacity/.estore in = \violin@batch@pts@opacity,
-	dataset fill/.estore in = \violin@batch@pts@fillcolor,
-	dataset fill opacity/.estore in = \violin@batch@pts@fillopacity,
-	dataset jitter/.estore in = \violin@batch@pts@jitter,
-	spacing/.estore in = \violin@batch@delta,
-	indexes/.estore in = \violin@batch@indexes,
-	primary color/.estore in = \violin@batch@color@primary,
-	secondary color/.estore in = \violin@batch@color@secondary,
-	labels/.estore in = \violin@batch@labels,
-	data label style/.estore in = \violin@batch@datalabelstyle,
+	default,
 }
 
 \newcommand{\violinsetoptions}[2][]{%
-
-	\def\violin@scaled{false}
-	\def\violin@datapoints{false}
-	\def\violin@averages{false}
-	\def\violin@nomirror{false}
-	\def\violin@reverseaxis{false}
-	\def\violin@axisoptions{#2}
-
-	\@for\kdeoption:=#1\do{
-		\noblanks[q]{\kdeoption}
-		\ifthenelse{
-			\equal{\thestring}{scaled}
-		}{
-			\def\violin@scaled{true}
-		}{}
-		\ifthenelse{
-			\equal{\thestring}{datapoints}
-		}{
-			\def\violin@datapoints{true}
-		}{}
-		\ifthenelse{
-			\equal{\thestring}{averages}
-		}{
-			\def\violin@averages{true}
-		}{}
-		\ifthenelse{
-			\equal{\thestring}{nomirror}
-		}{
-			\def\violin@nomirror{true}
-		}{}
-		\ifthenelse{
-			\equal{\thestring}{reverseaxis}
-		}{
-			\def\violin@reverseaxis{true}
-		}{}
+	\pgfkeys@spdef\violin@violinargs{#1}
+	\pgfkeys@spdef\violin@pgfplotsargs{#2}
+	\edef\violin@args{
+		/handler config=only existing,
+		/violinplot,
+		\expandonce{\violin@violinargs},
+		\expandonce{\violin@pgfplotsargs},
+		/handler config=all,
 	}
+	\pgfkeysalsofrom{\violin@args}
 
-	\ifthenelse{
-		\equal{\violin@reverseaxis}{true}
-	}{
-		\begin{axis}[
-			axis on top,
-			yticklabels={,,},
-			ymajorticks=false,
-			\violin@axisoptions,
-		]
-		\end{axis}
-	}{
-		\begin{axis}[
-			axis on top,
-			xticklabels={,,},
-			xmajorticks=false,
-			\violin@axisoptions,
-		]
-		\end{axis}
-	}
-
-	\@for\kdeoption:=\violin@axisoptions\do{
-		\noblanks[e]{\kdeoption}
-		\let\violin@opt\thestring
-		\whereisword[q]{\violin@opt}{xmin}
-		\ifthenelse{
-			\equal{\theresult}{0}
-		}{}{
-			\let\violin@axis@xmin\violin@opt
-		}
-		\whereisword[q]{\violin@opt}{xmax}
-		\ifthenelse{
-			\equal{\theresult}{0}
-		}{}{
-			\let\violin@axis@xmax\violin@opt
-		}
-		\whereisword[q]{\violin@opt}{ymin}
-		\ifthenelse{
-			\equal{\theresult}{0}
-		}{}{
-			\let\violin@axis@ymin\violin@opt
-		}
-		\whereisword[q]{\violin@opt}{ymax}
-		\ifthenelse{
-			\equal{\theresult}{0}
-		}{}{
-			\let\violin@axis@ymax\violin@opt
-		}
-	}
-
-	\def\violin@axislimits{
-		\violin@axis@xmin,\violin@axis@xmax,
-		\violin@axis@ymin,\violin@axis@ymax,
-	}
-
-	\let\violin@axisoptions\violin@axislimits
-
+	\pgfmathqparse{0}
+	\let\violin@numofplots\pgfmathresult  % Needed to distinguish first plot from others in \violinplot
 }
 
-\newcommand{\violinplot}[2][]{%
+\newcommand{\addviolinplot}[2][]{%
+	\pgfkeys{/violinplot, #1}
 
-	\pgfkeys{/violinplot, default, #1}
+	\edef\violin@filename{#2}
 
-	\def\violin@filename{#2}
+	\pgfkeys{/pgf/fpu}
 
 	\pgfplotstableread[%
 		col sep=\violin@colsep,
@@ -251,25 +205,24 @@
 	\pgfmathparse{int(\pgfmathresult-1)}
 	\let\violin@filename@lastindex\pgfmathresult
 
-	\pgfmathparse{0}
+	\pgfmathqparse{0}
 	\let\violin@dataset@stddev\pgfmathresult
 	\let\violin@dataset@average\pgfmathresult
 	\let\violin@dataset@weightsum\pgfmathresult
 	\let\violin@weight@row\pgfmathresult
 
 	% Calculating averages
+	\def\violin@frequencies@default{FREQINTERNALVIOLIN}
 	\pgfplotstableforeachcolumnelement{\violin@index}\of\theviolin@dataset@table\as\xi{%
-		\ifthenelse{
-			\equal{\violin@frequencies}{FREQINTERNALVIOLIN}
-		}{
-			\pgfmathparse{1}
+		\ifx\violin@frequencies\violin@frequencies@default
+			\pgfmathqparse{1}
 			\let\violin@dataset@weight\pgfmathresult
-		}{
+		\else
 			\pgfplotstablegetelem{\violin@weight@row}{\violin@frequencies}\of{\theviolin@dataset@table}
 			\let\violin@dataset@weight\pgfplotsretval
 			\pgfmathparse{\violin@weight@row+1}
 			\let\violin@weight@row\pgfmathresult
-		}
+		\fi
 		\pgfmathparse{\violin@dataset@weightsum+\violin@dataset@weight}
 		\let\violin@dataset@weightsum\pgfmathresult
 		\pgfmathparse{\violin@dataset@average+\xi*\violin@dataset@weight}
@@ -278,86 +231,72 @@
 	\pgfmathparse{\violin@dataset@average/\violin@dataset@weightsum}
 	\let\violin@dataset@average\pgfmathresult
 
-	\ifthenelse{
-		\equal{\violin@datapoints}{true}
-	}{
+	\ifviolin@datapoints
 		\pgfplotstablecreatecol[
 			create col/assign/.code={
 				\let\entry\violin@delta
 				\pgfkeyslet{/pgfplots/table/create col/next content}\entry
 			}
 		]{deltacol}\theviolin@dataset@table
-	}{}
+	\fi
 
-	\ifthenelse{
-		\equal{\violin@reverseaxis}{true}
-	}{
+	\ifviolin@reverseaxis
 		\def\violin@axis@x{y}
 		\def\violin@axis@y{x}
-	}{
+	\else
 		\def\violin@axis@x{x}
 		\def\violin@axis@y{y}
-	}
+	\fi
 
 	% Bandwidth calculation
-	\ifthenelse{%
-		\equal{\violin@bandwidth}{NONE}%
-	}{%
-		\pgfmathparse{0}
+	\def\violin@bandwidth@default{NONE}
+	\ifx\violin@bandwidth\violin@bandwidth@default
+		\pgfmathqparse{0}
 		\let\violin@weight@row\pgfmathresult
 		% Standard deviation calculation
 		\pgfplotstableforeachcolumnelement{\violin@index}\of\theviolin@dataset@table\as\xi{%
-			\ifthenelse{
-				\equal{\violin@frequencies}{FREQINTERNALVIOLIN}
-			}{
-				\pgfmathparse{1}
+			\ifx\violin@frequencies\violin@frequencies@default
+				\pgfmathqparse{1}
 				\let\violin@dataset@weight\pgfmathresult
-			}{
+			\else
 				\pgfplotstablegetelem{\violin@weight@row}{\violin@frequencies}\of{\theviolin@dataset@table}
 				\let\violin@dataset@weight\pgfplotsretval
 				\pgfmathparse{\violin@weight@row+1}
 				\let\violin@weight@row\pgfmathresult
-			}
+			\fi
 			\pgfmathparse{\violin@dataset@stddev+\violin@dataset@weight*(\xi-\violin@dataset@average)^2}
 			\let\violin@dataset@stddev\pgfmathresult
 		}
 		\pgfmathparse{sqrt(\violin@dataset@stddev/\violin@dataset@weightsum)}
 		\let\violin@dataset@stddev\pgfmathresult
 		\pgfmathparse{1.06*\violin@dataset@stddev*(\violin@dataset@weightsum^(-0.2))}%
-		\let\violin@bandwidth\pgfmathresult
-	}{%
-	}
+		\let\violin@bandwidthcalc\pgfmathresult
+	\else
+		\let\violin@bandwidthcalc\violin@bandwidth
+	\fi
 
 	% Setting limits for curve
 	\pgfplotstablegetelem{0}{\violin@index}\of{\theviolin@dataset@table}
 	\let\violin@dataset@min\pgfplotsretval
 	\let\violin@dataset@max\pgfplotsretval
 	\pgfplotstableforeachcolumnelement{\violin@index}\of\theviolin@dataset@table\as\xi{%
-		\pgfmathparse{%
-			\xi > \violin@dataset@min ? int(0) : int(1)%
-		}
-		\ifthenelse{
-			\pgfmathresult = 1
-		}{
+		\pgfmathparse{\xi > \violin@dataset@min}
+		\pgfmathfloattoint{\pgfmathresult}
+		\ifnum\pgfmathresult=0
 			\let\violin@dataset@min\xi
-		}{
-		}
+		\fi
 	}
-	\pgfmathparse{\violin@dataset@min - 3*\violin@bandwidth}
+	\pgfmathparse{\violin@dataset@min - 3*\violin@bandwidthcalc}
 	\let\violin@dataset@min\pgfmathresult
 
 	\pgfplotstableforeachcolumnelement{\violin@index}\of\theviolin@dataset@table\as\xi{%
-		\pgfmathparse{%
-			\xi < \violin@dataset@max ? int(0) : int(1)%
-		}
-		\ifthenelse{
-			\pgfmathresult = 1
-		}{
+		\pgfmathparse{\xi < \violin@dataset@max}
+		\pgfmathfloattoint{\pgfmathresult}
+		\ifnum\pgfmathresult=0
 			\let\violin@dataset@max\xi
-		}{
-		}
+		\fi
 	}
-	\pgfmathparse{\violin@dataset@max + 3*\violin@bandwidth}
+	\pgfmathparse{\violin@dataset@max + 3*\violin@bandwidthcalc}
 	\let\violin@dataset@max\pgfmathresult
 
 	% Creating curve domain
@@ -372,97 +311,83 @@
 	% Calculating KDE
 	\pgfplotstablenew[columns={list}]{\violin@samples}\violin@kde
 
-	\pgfmathparse{0.0}
+	\pgfmathqparse{0}
 	\let\violin@kde@max\pgfmathresult
+
+	\def\violin@kernel@gaussian{gaussian}
+	\def\violin@kernel@logistic{logistic}
+	\def\violin@kernel@parabolic{parabolic}
+	\def\violin@kernel@uniform{uniform}
+	\def\violin@kernel@triangular{triangular}
 
 	\pgfplotstablecreatecol[
 		create col/assign/.code={
 			\pgfmathparse{%
-				1.0/(\violin@dataset@weightsum*\violin@bandwidth)
+				1.0/(\violin@dataset@weightsum*\violin@bandwidthcalc)
 			}
 			\let\violin@kde@factor\pgfmathresult
-			\pgfmathparse{0}
+			\pgfmathqparse{0}
 			\let\violin@kde@accum\pgfmathresult
 			\let\violin@weight@row\pgfmathresult
 			\pgfplotstableforeachcolumnelement{\violin@index}\of\theviolin@dataset@table\as\xi{%
-				\ifthenelse{
-					\equal{\violin@frequencies}{FREQINTERNALVIOLIN}
-				}{
-					\pgfmathparse{1}
+				\ifx\violin@frequencies\violin@frequencies@default
+					\pgfmathqparse{1}
 					\let\violin@dataset@weight\pgfmathresult
-				}{
+				\else
 					\pgfplotstablegetelem{\violin@weight@row}{\violin@frequencies}\of{\theviolin@dataset@table}
 					\let\violin@dataset@weight\pgfplotsretval
 					\pgfmathparse{\violin@weight@row+1}
 					\let\violin@weight@row\pgfmathresult
-				}
+				\fi
 				\pgfmathparse{%
 					((\xi-\thisrow{list})/%
-					\violin@bandwidth)}
+					\violin@bandwidthcalc)}
 				\let\violin@u\pgfmathresult
-				\ifthenelse{
-					\equal{\violin@kernel}{gaussian}
-				}{
+				%
+				\ifx\violin@kernel\violin@kernel@gaussian
 					\pgfmathparse{\violin@kde@accum + %
 						\violin@dataset@weight*e^(-0.5*\violin@u*\violin@u)/sqrt(2*pi)}
 					\let\violin@kde@accum\pgfmathresult
-				}{}
-				\ifthenelse{
-					\equal{\violin@kernel}{logistic}
-				}{
+				\fi
+				\ifx\violin@kernel\violin@kernel@logistic
 					\pgfmathparse{\violin@kde@accum + %
 						\violin@dataset@weight*1/(e^\violin@u + 2 + e^(-\violin@u))
 					}
 					\let\violin@kde@accum\pgfmathresult
-				}{}
-				\ifthenelse{
-					\equal{\violin@kernel}{parabolic}
-				}{
-					\pgfmathparse{%
-						abs(\violin@u) < 1 ? int(0) : int(1)%
-					}
-					\ifthenelse{
-						\equal{\pgfmathresult}{0}
-					}{
+				\fi
+				\ifx\violin@kernel\violin@kernel@parabolic
+					\pgfmathparse{abs(\violin@u) < 1}
+					\pgfmathfloattoint{\pgfmathresult}
+					\ifnum\pgfmathresult=1
 						\pgfmathparse{\violin@kde@accum + %
 							\violin@dataset@weight*0.75*(1-\violin@u*\violin@u)
 						}
-					}{
+					\else
 						\pgfmathparse{\violin@kde@accum}
-					}
+					\fi
 					\let\violin@kde@accum\pgfmathresult
-				}{}
-				\ifthenelse{
-					\equal{\violin@kernel}{uniform}
-				}{
-					\pgfmathparse{%
-						abs(\violin@u) < 1 ? int(0) : int(1)%
-					}
-					\ifthenelse{
-						\equal{\pgfmathresult}{0}
-					}{
+				\fi
+				\ifx\violin@kernel\violin@kernel@uniform
+					\pgfmathparse{abs(\violin@u) < 1}
+					\pgfmathfloattoint{\pgfmathresult}
+					\ifnum\pgfmathresult=1
 						\pgfmathparse{\violin@kde@accum + \violin@dataset@weight*0.5}
-					}{
+					\else
 						\pgfmathparse{\violin@kde@accum}
-					}
+					\fi
 					\let\violin@kde@accum\pgfmathresult
-				}{}
-				\ifthenelse{
-					\equal{\violin@kernel}{triangular}
-				}{
-					\pgfmathparse{%
-						abs(\violin@u) < 1 ? int(0) : int(1)%
-					}
-					\ifthenelse{
-						\equal{\pgfmathresult}{0}
-					}{
+				\fi
+				\ifx\violin@kernel\violin@kernel@triangular
+					\pgfmathparse{abs(\violin@u) < 1}
+					\pgfmathfloattoint{\pgfmathresult}
+					\ifnum\pgfmathresult=1
 						\pgfmathparse{\violin@kde@accum + %
 							\violin@dataset@weight*(1-abs(\violin@u))}
-					}{
+					\else
 						\pgfmathparse{\violin@kde@accum}
-					}
+					\fi
 					\let\violin@kde@accum\pgfmathresult
-				}{}
+				\fi
 			}
 			\pgfmathparse{\violin@kde@accum*\violin@kde@factor}
 			\let\entry\pgfmathresult
@@ -471,157 +396,139 @@
 	]{kdecol}\violin@kde
 
 	\pgfplotstableforeachcolumnelement{kdecol}\of\violin@kde\as\entry{%
-		\pgfmathparse{%
-			\entry < \violin@kde@max ? int(0) : int(1)%
-		}
-		\ifthenelse{
-			\pgfmathresult = 1
-		}{
+		\pgfmathparse{\entry < \violin@kde@max}
+		\pgfmathfloattoint{\pgfmathresult}
+		\ifnum\pgfmathresult=0
 			\let\violin@kde@max\entry
-		}{
-		}
+		\fi
 	}
 
 	\pgfplotstablemodifyeachcolumnelement{kdecol}\of\violin@kde\as\cell{%
 		\let\pgfplotstablezero\violin@delta
-		\ifthenelse{
-			\pgfplotstablerow = 0
-		}{
+		\ifnum\pgfplotstablerow=0
 			\let\cell\pgfplotstablezero
-		}{
+		\else
 			\pgfmathparse{int(\violin@samples-1)}
-			\ifthenelse{
-				\pgfplotstablerow = \pgfmathresult
-			}{
+			\pgfmathfloattoint{\pgfmathresult}
+			\ifnum\pgfplotstablerow=\pgfmathresult
 				\let\cell\pgfplotstablezero
-			}{
-				\ifthenelse{
-					\equal{\violin@nomirror}{true}
-				}{
-					\pgfmathparse{1.9}
-				}{
-					\pgfmathparse{1}
-				}
+			\else
+				\ifviolin@nomirror
+					\pgfmathqparse{1.9}
+				\else
+					\pgfmathqparse{1}
+				\fi
 				\let\violin@mirror@factor\pgfmathresult
-				\ifthenelse{
-					\equal{\violin@scaled}{true}
-				}{
+				\ifviolin@scaled
 					\pgfmathparse{\violin@delta+\violin@mirror@factor*0.5*\cell/\violin@kde@max}
-				}{
+				\else
 					\pgfmathparse{\violin@delta+\violin@mirror@factor*\cell}
-				}
+				\fi
 				\let\cell\pgfmathresult
-			}
-		}
+			\fi
+		\fi
 	}
 
-	\ifthenelse{
-		\equal{\violin@nomirror}{false}
-	}{
+	\ifviolin@nomirror
+		\ifviolin@invert
+			\pgfplotstablemodifyeachcolumnelement{kdecol}\of\violin@kde\as\cell{%
+				\pgfmathparse{-\cell+2*\violin@delta}
+				\let\cell\pgfmathresult
+			}
+		\fi
+	\else
 		\pgfplotstablecreatecol[
 			create col/assign/.code={
 				\pgfmathparse{-\thisrow{kdecol}+2*\violin@delta}
 				\let\entry\pgfmathresult
 				\pgfkeyslet{/pgfplots/table/create col/next content}\entry
 			}
-		]{kdecolinv}\violin@kde
-	}{
-		\ifthenelse{
-			\equal{\violin@invert}{true}
-		}{
-			\pgfplotstablemodifyeachcolumnelement{kdecol}\of\violin@kde\as\cell{%
-				\pgfmathparse{-\cell+2*\violin@delta}
-				\let\cell\pgfmathresult
+		]{kdecolmirror}\violin@kde
+
+		\pgfplotstablenew[columns={list}]{\violin@samples}\violin@kdewithmirror
+		\pgfplotstablecreatecol[
+			copy column from table={\violin@kde}{kdecol}
+		]{kdecol}{\violin@kdewithmirror}
+		\pgfplotstablesort[
+			sort key=list,
+			sort cmp=float <,
+		]{\violin@kdewithmirror}{\violin@kdewithmirror}
+
+		\pgfplotstablenew[columns={list}]{\violin@samples}\violin@kdemirror
+		\pgfplotstablecreatecol[
+			copy column from table={\violin@kde}{kdecolmirror}
+		]{kdecol}{\violin@kdemirror}
+		\pgfplotstablesort[
+			sort key=list,
+			sort cmp=float >,
+		]{\violin@kdemirror}{\violin@kdemirror}
+
+		\pgfplotstablevertcat{\violin@kdewithmirror}{\violin@kdemirror}
+	\fi
+
+	\pgfkeys{/pgf/fpu=false}
+
+	\ifviolin@nomirror
+		\ifviolin@reverseaxis
+			\edef\violin@addplot{
+				\noexpand\addplot[
+					no marks,
+					fill=\violin@color,
+					fill opacity=\violin@fillopacity,
+				] table [
+					\violin@axis@x=kdecol, \violin@axis@y=list
+				] {\noexpand\violin@kde};
 			}
-		}{}
-	}
-
-	\ifthenelse{
-		\equal{\violin@reverseaxis}{true}
-	}{
-		\pgfkeys{
-			/pgfplots/xticklabels={,,},
-			/pgfplots/yticklabels={\violin@label},
-			/pgfplots/ytick={\violin@delta},
-			/pgfplots/xmajorticks=false,
-		}
-	}{
-		\pgfkeys{
-			/pgfplots/yticklabels={,,},
-			/pgfplots/xticklabels={\violin@label},
-			/pgfplots/xtick={\violin@delta},
-			/pgfplots/ymajorticks=false,
-		}
-	}
-
-	\begin{axis}[
-		\violin@axisoptions,
-		axis on top,
-		axis line style={draw=none},
-		tick style={draw=none},
-		xticklabel style={\violin@datalabelstyle},
-		yticklabel style={\violin@datalabelstyle},
-	]
-		\addplot[
-			no marks,
-			color=\violin@color,
-		] table [
-			\violin@axis@x=kdecol, \violin@axis@y=list
-		] {\violin@kde};
-		\addplot[
-			no marks,
-			fill=\violin@color,
-			opacity=0.50,
-		] table [
-			\violin@axis@x=kdecol, \violin@axis@y=list
-		] {\violin@kde};
-		\ifthenelse{
-			\equal{\violin@nomirror}{false}
-		}{
-			\addplot[
-				no marks,
-				color=\violin@color,
-			] table [
-				\violin@axis@x=kdecolinv, \violin@axis@y=list
-			] {\violin@kde};
-			\addplot[
+			\violin@addplot
+			\edef\violin@addplot{
+				\noexpand\addplot[
+					no marks,
+					color=black,
+				] coordinates {
+					(\violin@xmin,\violin@delta)%
+					(\violin@xmax,\violin@delta)
+				};
+			}
+			\violin@addplot
+		\else
+			\edef\violin@addplot{
+				\noexpand\addplot[
+					no marks,
+					fill=\violin@color,
+					fill opacity=\violin@fillopacity,
+				] table [
+					\violin@axis@x=kdecol, \violin@axis@y=list
+				] {\noexpand\violin@kde};
+			}
+			\violin@addplot
+			\edef\violin@addplot{
+				\noexpand\addplot[
+					no marks,
+					color=black,
+				] coordinates {
+					(\violin@delta,\violin@ymin)%
+					(\violin@delta,\violin@ymax)
+				};
+			}
+			\violin@addplot
+		\fi
+	\else
+		\edef\violin@addplot{
+			\noexpand\addplot[
 				no marks,
 				fill=\violin@color,
-				opacity=0.50,
+				fill opacity=\violin@fillopacity,
 			] table [
-				\violin@axis@x=kdecolinv, \violin@axis@y=list
-			] {\violin@kde};
-		}{}
-		\ifthenelse{
-			\equal{\violin@nomirror}{true}
-		}{
-			\ifthenelse{
-				\equal{\violin@reverseaxis}{false}
-			}{
-				\addplot[
-					no marks,
-					color=black,
-				] coordinates {
-					(\violin@delta,\pgfkeysvalueof{/pgfplots/ymin})%
-					(\violin@delta,\pgfkeysvalueof{/pgfplots/ymax})
-				};
-			}{
-				\addplot[
-					no marks,
-					color=black,
-				] coordinates {
-					(\pgfkeysvalueof{/pgfplots/xmin},\violin@delta)%
-					(\pgfkeysvalueof{/pgfplots/xmax},\violin@delta)
-				};
-			}
-		}{}
-		\ifthenelse{
-			\equal{\violin@averages}{true}
-		}{
-			\ifthenelse{
-				\equal{\violin@reverseaxis}{true}
-			}{
-				\addplot[
+				\violin@axis@x=kdecol, \violin@axis@y=list
+			] {\noexpand\violin@kdewithmirror};
+		}
+		\violin@addplot
+	\fi
+
+	\ifviolin@averages
+		\ifviolin@reverseaxis
+			\edef\violin@addplot{
+				\noexpand\addplot[
 					only marks,
 					mark=\violin@avg@mark,
 					mark size=\violin@avg@size,
@@ -632,8 +539,11 @@
 				] coordinates {
 					(\violin@dataset@average,\violin@delta)
 				};
-			}{
-				\addplot[
+			}
+			\violin@addplot
+		\else
+			\edef\violin@addplot{
+				\noexpand\addplot[
 					only marks,
 					mark=\violin@avg@mark,
 					mark size=\violin@avg@size,
@@ -645,11 +555,13 @@
 					(\violin@delta,\violin@dataset@average)
 				};
 			}
-		}{}
-		\ifthenelse{
-			\equal{\violin@datapoints}{true}
-		}{
-			\addplot[
+			\violin@addplot
+		\fi
+	\fi
+
+	\ifviolin@datapoints
+		\edef\violin@addplot{
+			\noexpand\addplot[
 				only marks,
 				mark=\violin@pts@mark,
 				mark size=\violin@pts@size,
@@ -661,93 +573,138 @@
 			] table [
 				\violin@axis@x=deltacol,
 				\violin@axis@y=\violin@index,
-			] {\theviolin@dataset@table};
-		}{}
-	\end{axis}
-
+			] {\noexpand\theviolin@dataset@table};
+		}
+		\violin@addplot
+	\fi
 }
 
 \newcommand{\violin@getnth}[2]{%
-	\pgfmathparse{int(0)}
+	\pgfmathqparse{0}
 	\let\violin@getnth@counter\pgfmathresult
 	\let\violin@nthelem\pgfmathresult
 	\@for\violin@listelem:=#1\do{
-		\ifthenelse{
-			\equal{#2}{\violin@getnth@counter}
-		}{
+		\ifnum#2=\violin@getnth@counter
 			\let\violin@nthelem\violin@listelem
 			\pgfmathparse{int(\violin@getnth@counter+1)}
 			\let\violin@getnth@counter\pgfmathresult
-		}{
+		\else
 			\pgfmathparse{int(\violin@getnth@counter+1)}
 			\let\violin@getnth@counter\pgfmathresult
-		}
+		\fi
 	}
 }
 
-\newcommand{\violinplotwholefile}[2][]{%
+\newcommand{\violinplot}[2][]{%
+	\pgfkeys{/violinplot, default}
+	\pgfkeysalsofrom{\violin@args}
+	\pgfkeys{/violinplot, #1}
 
-	\pgfkeys{/violinplotwholefile, default, #1}
-	\def\violin@batch@filename{#2}
+	\def\violin@filename{#2}
 
-	\pgfmathparse{0}
-	\let\violin@batch@numofplots\pgfmathresult
-	\@for\index:=\violin@batch@indexes\do{
-		\pgfmathparse{int(\violin@batch@numofplots+1)}
-		\let\violin@batch@numofplots\pgfmathresult
-	}
-
-	\pgfmathparse{0}
-	\let\violin@batch@color@deg\pgfmathresult
-	\let\violin@batch@counter\pgfmathresult
-	\let\violin@batch@relativepos\pgfmathresult
-
-	\@for\violin@batch@index:=\violin@batch@indexes\do{
-		\ifthenelse{%
-			\equal{1}{\violin@batch@numofplots}
-		}{%
-			\pgfmathparse{50}
-		}{%
-			\pgfmathparse{int(\violin@batch@counter*%
-				(100/(\violin@batch@numofplots-1)))}
+	\ifviolin@reverseaxis
+		\pgfplotsset{
+			yticklabels/.expand once={\violin@label},
+			ytick/.expand once={\violin@delta},
+			yticklabel style={\violin@datalabelstyle},
 		}
-		\let\violin@batch@color@deg\pgfmathresult
-		\edef\violin@batch@color{\violin@batch@color@primary!\violin@batch@color@deg!\violin@batch@color@secondary}
+	\else
+		\pgfplotsset{
+			xticklabels/.expand once={\violin@label},
+			xtick/.expand once={\violin@delta},
+			xticklabel style={\violin@datalabelstyle},
+		}
+	\fi
 
-		\violin@getnth{\violin@batch@labels}{\violin@batch@counter}
-		\let\violin@batch@label\violin@nthelem
+	\pgfmathparse{\violin@numofplots!=0}  % Current plot is not first plot
+	\ifnum\pgfmathresult=1
+		\ifviolin@reverseaxis
+			\pgfplotsset{hide x axis}
+		\else
+			\pgfplotsset{hide y axis}
+		\fi
 
-		\pgfmathparse{1+\violin@batch@counter*\violin@batch@delta}
-		\let\violin@batch@relativepos\pgfmathresult
+		\pgfplotsset{
+			title={},
+			xlabel={},
+			ylabel={},
+			axis line style={draw=none},
+			grid={none},
+		}
+	\fi
 
-		\violinplot[%
-			col sep = \violin@batch@colsep,
-			bandwidth=\violin@batch@bandwidth,
-			kernel = \violin@batch@kernel,
-			index=\violin@batch@index,
-			relative position=\violin@batch@relativepos,
-			samples = \violin@batch@samples,
-			color=\violin@batch@color,
-			label={\violin@batch@label},
-			data label style={\violin@batch@datalabelstyle},
-			average mark = \violin@batch@avg@mark,
-			average size = \violin@batch@avg@size,
-			average color = \violin@batch@avg@color,
-			average opacity = \violin@batch@avg@opacity,
-			average fill = \violin@batch@avg@fillcolor,
-			average fill opacity = \violin@batch@avg@fillopacity,
-			dataset mark = \violin@batch@pts@mark,
-			dataset size = \violin@batch@pts@size,
-			dataset color = \violin@batch@pts@color,
-			dataset opacity = \violin@batch@pts@opacity,
-			dataset fill = \violin@batch@pts@fillcolor,
-			dataset fill opacity = \violin@batch@pts@fillopacity,
-			dataset jitter = \violin@batch@pts@jitter
-		]{\violin@batch@filename}
+	\begin{axis}[
+		axis on top,
+	]
+		\addviolinplot{\violin@filename}
+	\end{axis}
 
-		\pgfmathparse{int(\violin@batch@counter+1)}
-		\let\violin@batch@counter\pgfmathresult
+	\pgfmathparse{int(\violin@numofplots+1)}
+	\let\violin@numofplots\pgfmathresult
+}
+
+\newcommand{\violinplotwholefile}[2][]{%
+	\pgfkeys{/violinplot, default}
+	\pgfkeysalsofrom{\violin@args}
+	\pgfkeys{/violinplot, #1}
+
+	\def\violin@filename{#2}
+
+	\pgfmathqparse{0}
+	\let\violin@numofplots\pgfmathresult
+	\@for\violin@plotindex:=\violin@indexes\do{
+		\pgfmathparse{int(\violin@numofplots+1)}
+		\let\violin@numofplots\pgfmathresult
 	}
 
+	\pgfmathqparse{0}
+	\let\violin@counter\pgfmathresult
+	\let\violin@relativepos\pgfmathresult
+
+	\pgfmathqparse{1}
+	\let\violin@start\pgfmathresult
+	\pgfmathparse{1+\violin@spacing}
+	\let\violin@step\pgfmathresult
+	\pgfmathparse{\violin@spacing*(\violin@numofplots-\violin@start)+\violin@start}
+	\let\violin@stop\pgfmathresult
+
+	\ifviolin@reverseaxis
+		\pgfplotsset{
+			yticklabels/.expand once={\violin@labels},
+			ytick/.expand once={\violin@start, \violin@step, ..., \violin@stop},
+			yticklabel style={\violin@datalabelstyle},
+		}
+	\else
+		\pgfplotsset{
+			xticklabels/.expand once={\violin@labels},
+			xtick/.expand once={\violin@start, \violin@step, ..., \violin@stop},
+			xticklabel style={\violin@datalabelstyle},
+		}
+	\fi
+
+	\begin{axis}[
+		axis on top,
+	]
+		\@for\violin@plotindex:=\violin@indexes\do{
+			\ifnum\violin@numofplots=1
+				\pgfmathqparse{50}
+			\else
+				\pgfmathparse{int(\violin@counter*(100/(\violin@numofplots-1)))}
+			\fi
+			\let\violin@color@deg\pgfmathresult
+
+			\pgfmathparse{1+\violin@counter*\violin@spacing}
+			\let\violin@relativepos\pgfmathresult
+
+			\addviolinplot[%
+				index=\violin@plotindex,
+				relative position=\violin@relativepos,
+				color={\violin@color@primary!\violin@color@deg!\violin@color@secondary},
+			]{\violin@filename}
+
+			\pgfmathparse{int(\violin@counter+1)}
+			\let\violin@counter\pgfmathresult
+		}
+	\end{axis}
 }
 
