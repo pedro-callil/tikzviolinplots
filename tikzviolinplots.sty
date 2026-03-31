@@ -17,7 +17,7 @@
 % tikzviolinplots.tex.
 
 \NeedsTeXFormat{LaTeX2e}[1994/06/01]
-\ProvidesPackage{tikzviolinplots}[2026/03/31 v0.11.0 Violin plot creation in pgfplots]
+\ProvidesPackage{tikzviolinplots}[2026/03/31 v0.11.1 Violin plot creation in pgfplots]
 
 \RequirePackage{pgfplots}
 \RequirePackage{pgfplotstable}
@@ -468,6 +468,17 @@
 
 	\pgfkeys{/pgf/fpu=false}
 
+	% Data points must be centered only if plot is mirrored
+	\ifviolin@nomirror
+		\ifviolin@invert
+			\def\randfct{(-rnd)}
+		\else
+			\def\randfct{(rnd)}
+		\fi
+	\else
+		\def\randfct{(rand)}
+	\fi
+
 	\ifviolin@nomirror
 		\ifviolin@reverseaxis
 			\edef\violin@addplot{
@@ -569,7 +580,8 @@
 				opacity=\violin@pts@opacity,
 				fill=\violin@pts@fillcolor,
 				fill opacity=\violin@pts@fillopacity,
-				\violin@axis@x\space filter/.expression={\violin@axis@x + \violin@pts@jitter * rand}
+				\violin@axis@x\space
+				filter/.expression={\violin@axis@x + \violin@pts@jitter * \randfct}
 			] table [
 				\violin@axis@x=deltacol,
 				\violin@axis@y=\violin@index,

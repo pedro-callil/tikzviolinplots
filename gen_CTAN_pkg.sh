@@ -1,5 +1,7 @@
 #! /bin/bash
 
+rm tikzviolinplots-figure*.md5
+
 lualatex -shell-escape tikzviolinplots.tex
 lualatex -shell-escape tikzviolinplots.tex
 
